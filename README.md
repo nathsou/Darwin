@@ -16,7 +16,7 @@ For instance the 'Typing Monkeys' demo tries to evolve toward a target string, t
 
 On the other hand, the 'Smart Eaters' demo evolves the weights and biases of an artificial neural network, the fitness of a 'Eater' is the number of nutriments he eats in one generation.
 
-```TypeScript
+```javascript
   let genetics = new Darwin<T>({
     population_size: number,
     chromosome_length: number,
@@ -31,7 +31,7 @@ On the other hand, the 'Smart Eaters' demo evolves the weights and biases of an 
 
 The constructor of the Darwin class initializes a population of random chromosomes, we can now assign a score (or fitness) to each of those chromosomes based on their genes (Chromosome<T>.getBits()):
 
-```TypeScript
+```javascript
   for (let chromo of genetics.getPopulation()) {
     chromo.setFitness(...);
   }
@@ -39,13 +39,13 @@ The constructor of the Darwin class initializes a population of random chromosom
 
 A new generation can then be generated:
 
-```TypeScript
+```javascript
   genetics.mate();
 ```
 
 To observe the evolution of the population, one can call:
 
-```TypeScript
+```javascript
   let avg = genetics.getAverageFitness();
   let max = genetics.getFittest().getFitness();
 ```
