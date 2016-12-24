@@ -23,8 +23,11 @@ class Eater {
 class Eaters {
     constructor(cnv_selector, params) {
         this.params = params;
-        this.TWO_PI = 2 * Math.PI;
         this.ticks = 0;
+        this.follow_fittest = false;
+        this.paused = false;
+        this.fast_mode = false;
+        this.fast_mode_refresh_rate = 2;
         this.cnv = document.querySelector(cnv_selector);
         this.ctx = this.cnv.getContext('2d');
         let choose = (a, b) => {
@@ -58,8 +61,23 @@ class Eaters {
         this.population = [];
         let c = 0;
         for (let chromo of this.genetics.getPopulation()) {
-            this.population.push(new Eater(this.randomPos(), Math.random() * this.TWO_PI, c++));
+            this.population.push(new Eater(this.randomPos(), Math.random() * MathUtils.TWO_PI, c++));
         }
+        this.cnv.addEventListener('click', (e) => {
+            let mouse_pos = new Vector2D(e.clientX, e.clientY);
+            let closest_eater_idx = 0, closest_eater_dist = Infinity;
+            for (let i = 0; i < this.population.length; i++) {
+                let dist_sq = this.population[i].getPosition().dist_sq(mouse_pos);
+                if (dist_sq < closest_eater_dist) {
+                    closest_eater_dist = dist_sq;
+                    closest_eater_idx = i;
+                }
+            }
+            if (Math.pow(closest_eater_dist, 0.5) < this.params.eater_size)
+                this.setSelected(closest_eater_idx);
+            else
+                this.selected_idx = undefined;
+        });
         this.spawnFood();
     }
     spawnFood() {
@@ -85,6 +103,8 @@ class Eaters {
         };
     }
     tick() {
+        if (this.paused)
+            return;
         if (++this.ticks > this.params.ticks_per_gen) {
             this.next_gen();
             this.ticks = 0;
@@ -125,23 +145,30 @@ class Eaters {
                 pos.y = this.cnv.height;
         }
     }
+    pause() {
+        this.paused = !this.paused;
+    }
     next_gen() {
-        console.log('avg', this.genetics.getAverageFitness());
-        console.log('best', this.genetics.getFittest().getFitness());
         this.genetics.mate();
         this.spawnFood();
         for (let eater of this.population)
             eater.setPosition(this.randomPos());
+        this.selected_idx = undefined;
     }
     run() {
         let update = () => {
             this.tick();
             this.render();
-            requestAnimationFrame(update);
+            if (!this.fast_mode)
+                requestAnimationFrame(update);
+            else
+                setTimeout(update, 0);
         };
         update();
     }
     render() {
+        if (this.fast_mode && this.ticks % this.fast_mode_refresh_rate !== 0)
+            return;
         this.genetics.updateStats();
         this.ctx.clearRect(0, 0, this.cnv.width, this.cnv.height);
         //draw food
@@ -180,11 +207,41 @@ class Eaters {
             this.ctx.lineTo(p2.x, p2.y);
             this.ctx.fill();
         }
+        //highlight the selected eater:
+        if (this.follow_fittest)
+            this.selected_idx = this.genetics.getPopulation().indexOf(this.genetics.getFittest());
+        if (this.selected_idx) {
+            this.ctx.lineWidth = 2;
+            this.ctx.strokeStyle = 'red';
+            this.ctx.beginPath();
+            let eater = this.population[this.selected_idx];
+            let pos = eater.getPosition();
+            this.ctx.arc(pos.x, pos.y, this.params.eater_size * 2, 0, MathUtils.TWO_PI);
+            this.ctx.stroke();
+            this.ctx.closePath();
+            this.ctx.beginPath();
+            this.ctx.lineWidth = 1;
+            this.ctx.strokeStyle = 'black';
+            this.ctx.moveTo(pos.x, pos.y);
+            let food_dir = pos.add(eater.food_dir.times(this.params.eater_size * 2));
+            this.ctx.lineTo(food_dir.x, food_dir.y);
+            this.ctx.stroke();
+        }
         this.ctx.fillStyle = 'black';
         this.ctx.fillText(`Generation: ${this.genetics.generation}`, 5, 10);
         this.ctx.fillText(`avg fitness: ${this.genetics.getAverageFitness().toFixed(4)}`, 5, 25);
         this.ctx.fillText(`best: ${this.genetics.getFittest().getFitness()}`, 5, 40);
         this.ctx.fillText(`ticks: ${this.ticks} / ${this.params.ticks_per_gen}`, 5, 55);
+    }
+    setSelected(index) {
+        this.follow_fittest = false;
+        this.selected_idx = index;
+    }
+    toggleFastMode() {
+        this.fast_mode = !this.fast_mode;
+    }
+    getDarwinInstance() {
+        return this.genetics;
     }
 }
 let MathUtils = {
@@ -197,5 +254,6 @@ let MathUtils = {
     },
     map: (value, start1, stop1, start2, stop2) => {
         return ((value - start1) / (stop1 - start1)) * (stop2 - start2) + start2;
-    }
+    },
+    TWO_PI: 2 * Math.PI
 };

@@ -1,6 +1,6 @@
 <html>
     <head>
-        <title>EvoEaters</title>
+        <title>SmartEaters</title>
         <meta charset='utf-8'></meta>
 
         <style>
@@ -22,24 +22,52 @@
 
         <script>
 
-            let cnv = document.querySelector('#cnv');
-            cnv.width = window.innerWidth;
-            cnv.height = window.innerHeight;
-
-            window.addEventListener('resize', e => {
-                cnv.width = window.innerWidth;
-                cnv.height = window.innerHeight;
-            });
+            let canvas = document.querySelector('#cnv');
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
 
             let eaters = new Eaters('#cnv', {
                 elite_count: 10,
                 elite_copies: 2,
                 ticks_per_gen: 2000,
-                population_size: 200,
-                food_count: 150
+                population_size: 500,
+                food_count: 400
             });
 
             eaters.run();
+
+            window.addEventListener('resize', e => {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            });
+
+            window.addEventListener('keypress', e => {
+                switch (e.keyCode) {
+
+                    case 32: //SPACE
+                        eaters.pause();
+                        break;
+
+                    case 102: //F
+                        eaters.follow_fittest = true;
+                        break;
+
+                    case 112: //p
+                        eaters.fast_mode_refresh_rate += 2;
+                        break;
+                    
+                    case 109: //m 
+                        eaters.fast_mode_refresh_rate -= 2;
+                        if (eaters.fast_mode_refresh_rate < 1)
+                            eaters.fast_mode_refresh_rate = 1;
+                        break;
+
+                    default:
+                        eaters.toggleFastMode();
+                        break;
+                }
+            });
+
 
         </script>
 
