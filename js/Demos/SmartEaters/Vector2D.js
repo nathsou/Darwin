@@ -67,4 +67,7 @@ class Vector2D {
     static rand() {
         return new Vector2D(Math.random(), Math.random());
     }
+    static clone(v) {
+        return new Vector2D(v.x, v.y);
+    }
 }

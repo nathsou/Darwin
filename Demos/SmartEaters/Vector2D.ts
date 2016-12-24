@@ -91,4 +91,7 @@ class Vector2D {
         return new Vector2D(Math.random(), Math.random());
     }
 
+    static clone(v: Vector2D) : Vector2D {
+        return new Vector2D(v.x, v.y);
+    }
 }

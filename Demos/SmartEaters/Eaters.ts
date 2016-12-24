@@ -11,12 +11,13 @@ interface EatersParams {
     ticks_per_gen?: number,
     crossover_method?: CrossoverMethod,
     eater_size?: number,
-    food_size?: number
+    food_size?: number,
+    wrap_borders?: boolean
 }
 
 class Eater {
 
-    public closest_food_idx: number;
+    public closest_food: Vector2D;
     public food_dir: Vector2D;
     public lookat: Vector2D;
     
@@ -59,14 +60,15 @@ class Eaters {
     public follow_fittest = false;
     private paused = false;
     private fast_mode = false;
-    private fast_mode_refresh_rate = 2;
+    public fast_mode_refresh_rate = 2;
     public show_lines = false;
+    public hide_non_selected = false;
 
     constructor(cnv_selector: string, private params?: EatersParams) {
         this.cnv = document.querySelector(cnv_selector) as HTMLCanvasElement;
         this.ctx = this.cnv.getContext('2d');
 
-        let choose = (a: number, b: number): number => { //won't automatically choose b if a == 0
+        let choose = (a: any, b: any): any => { //won't automatically choose b if a == 0
             if (a === null || a === undefined) return b;
             return a;
         };
@@ -86,6 +88,7 @@ class Eaters {
         this.params.crossover_method = choose(this.params.crossover_method, CrossoverMethod.SINGLE_POINT);
         this.params.eater_size = this.params.eater_size || 12;
         this.params.food_size = this.params.food_size || 5;
+        this.params.wrap_borders = choose(this.params.wrap_borders, true);
 
 
         this.layer_sizes = [4, ...this.params.hidden_layers_sizes, 2];
@@ -118,7 +121,7 @@ class Eaters {
                 }
             }
 
-            if (closest_eater_dist ** 0.5 < this.params.eater_size)
+            if (closest_eater_dist ** 0.5 < this.params.eater_size * 2)
                 this.setSelected(closest_eater_idx);
             else this.selected_idx = undefined;
         });
@@ -167,11 +170,12 @@ class Eaters {
 
         //Update positions
         for (let eater of this.population) {
+
             let chromo = this.genetics.getPopulation()[eater.getChromosomeIdx()];
             this.brain.putWeights(this.layer_sizes, chromo.getBits());
 
             let closest_food = this.getClosestFood(eater);
-            eater.closest_food_idx = closest_food.index;
+            eater.closest_food = Vector2D.clone(this.food[closest_food.index]);
 
             //food dir
             let [food_l, food_r] = this.food[closest_food.index].sub(eater.getPosition()).normalize().toArray();
@@ -203,11 +207,18 @@ class Eaters {
 
             let pos = eater.getPosition();
 
-            //wrap around the borders
-            if (pos.x > this.cnv.width) pos.x = 0;
-            if (pos.x < 0) pos.x = this.cnv.width;
-            if (pos.y > this.cnv.height) pos.y = 0; 
-            if (pos.y < 0) pos.y = this.cnv.height;
+            if (this.params.wrap_borders) {
+                if (pos.x > this.cnv.width) pos.x = 0;
+                if (pos.x < 0) pos.x = this.cnv.width;
+                if (pos.y > this.cnv.height) pos.y = 0; 
+                if (pos.y < 0) pos.y = this.cnv.height;
+            } else {
+                if (pos.x > this.cnv.width) pos.x = this.cnv.width;
+                if (pos.x < 0) pos.x = 0;
+                if (pos.y > this.cnv.height) pos.y = this.cnv.height; 
+                if (pos.y < 0) pos.y = 0;
+            }
+
         }
 
     }
@@ -263,9 +274,13 @@ class Eaters {
 
         let c1 = [46, 204, 113],
             c2 = [255, 0, 0],
-            max = this.genetics.getFittest().getFitness();
+            max = this.genetics.getFittest().getFitness(),
+            i = 0;
+
 
         for (let eater of this.population) {
+
+            if (this.hide_non_selected && this.selected_idx && i++ !== this.selected_idx) continue;
 
             let fitness = this.genetics.getPopulation()[eater.getChromosomeIdx()].getFitness();
             
@@ -300,8 +315,8 @@ class Eaters {
                 this.ctx.lineWidth = 1;
                 this.ctx.strokeStyle = 'black';
                 this.ctx.moveTo(eater.getPosition().x, eater.getPosition().y);
-                let food_dir = eater.getPosition().add(eater.food_dir.times(this.params.eater_size * 2));
-                this.ctx.lineTo(food_dir.x, food_dir.y);
+                let food = eater.getPosition().add(eater.food_dir.times(eater.getPosition().dist(eater.closest_food)));
+                this.ctx.lineTo(food.x, food.y);
                 this.ctx.stroke();
             }
 
@@ -312,7 +327,7 @@ class Eaters {
         if (this.follow_fittest) 
             this.selected_idx = this.genetics.getPopulation().indexOf(this.genetics.getFittest());
 
-        if (this.selected_idx) {
+        if (this.selected_idx && !this.hide_non_selected) {
             this.ctx.lineWidth = 2;
             this.ctx.strokeStyle = 'red';
             this.ctx.beginPath();
@@ -349,6 +364,10 @@ class Eaters {
 
     public getDarwinInstance() : Darwin<number> {
         return this.genetics;
+    }
+
+    public getFittestBrain() : Function {
+        return NeuralNet.fromWeights(this.layer_sizes, this.genetics.getFittest().getBits()).toFunction();
     }
 
 }
