@@ -60,6 +60,7 @@ class Eaters {
     private paused = false;
     private fast_mode = false;
     private fast_mode_refresh_rate = 2;
+    public show_lines = false;
 
     constructor(cnv_selector: string, private params?: EatersParams) {
         this.cnv = document.querySelector(cnv_selector) as HTMLCanvasElement;
@@ -293,6 +294,16 @@ class Eaters {
             this.ctx.lineTo(la.x, la.y);
             this.ctx.lineTo(p2.x, p2.y);
             this.ctx.fill();
+
+            if (this.show_lines) {
+                this.ctx.beginPath();
+                this.ctx.lineWidth = 1;
+                this.ctx.strokeStyle = 'black';
+                this.ctx.moveTo(eater.getPosition().x, eater.getPosition().y);
+                let food_dir = eater.getPosition().add(eater.food_dir.times(this.params.eater_size * 2));
+                this.ctx.lineTo(food_dir.x, food_dir.y);
+                this.ctx.stroke();
+            }
 
         }
 

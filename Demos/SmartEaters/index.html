@@ -30,8 +30,9 @@
                 elite_count: 10,
                 elite_copies: 2,
                 ticks_per_gen: 2000,
-                population_size: 500,
-                food_count: 400
+                population_size: 200,
+                food_count: 170,
+                crossover_method: CrossoverMethod.TWO_POINT
             });
 
             eaters.run();
@@ -60,6 +61,10 @@
                         eaters.fast_mode_refresh_rate -= 2;
                         if (eaters.fast_mode_refresh_rate < 1)
                             eaters.fast_mode_refresh_rate = 1;
+                        break;
+
+                    case 108: //l
+                        eaters.show_lines = !eaters.show_lines;
                         break;
 
                     default:

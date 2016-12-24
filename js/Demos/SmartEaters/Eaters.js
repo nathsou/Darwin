@@ -28,6 +28,7 @@ class Eaters {
         this.paused = false;
         this.fast_mode = false;
         this.fast_mode_refresh_rate = 2;
+        this.show_lines = false;
         this.cnv = document.querySelector(cnv_selector);
         this.ctx = this.cnv.getContext('2d');
         let choose = (a, b) => {
@@ -206,6 +207,15 @@ class Eaters {
             this.ctx.lineTo(la.x, la.y);
             this.ctx.lineTo(p2.x, p2.y);
             this.ctx.fill();
+            if (this.show_lines) {
+                this.ctx.beginPath();
+                this.ctx.lineWidth = 1;
+                this.ctx.strokeStyle = 'black';
+                this.ctx.moveTo(eater.getPosition().x, eater.getPosition().y);
+                let food_dir = eater.getPosition().add(eater.food_dir.times(this.params.eater_size * 2));
+                this.ctx.lineTo(food_dir.x, food_dir.y);
+                this.ctx.stroke();
+            }
         }
         //highlight the selected eater:
         if (this.follow_fittest)
