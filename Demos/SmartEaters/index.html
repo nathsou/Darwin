@@ -26,6 +26,11 @@
             cnv.width = window.innerWidth;
             cnv.height = window.innerHeight;
 
+            window.addEventListener('resize', e => {
+                cnv.width = window.innerWidth;
+                cnv.height = window.innerHeight;
+            });
+
             let eaters = new Eaters('#cnv', {
                 elite_count: 10,
                 elite_copies: 2,
