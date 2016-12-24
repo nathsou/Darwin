@@ -2,7 +2,12 @@
 
 Flexible genetic algorithm implementation in TypeScript.
 
-### Usage
+### Demos
+
+- [Smart Eaters](https://nathsou.github.io/Darwin/Demos/SmartEaters/) inspired by [Daniel Shiffman](http://natureofcode.com/book/chapter-9-the-evolution-of-code/)
+- [Typing Monkeys](https://nathsou.github.io/Darwin/Demos/TypingMonkeys/) inspired by [ai-junkie.com](http://www.ai-junkie.com/ann/evolved/nnt1.html)
+
+## Usage
 
 One must first choose a way of encoding the desired behavior as an array of some type and of evaluating the fitness of any such array.
 
@@ -43,8 +48,3 @@ To observe the evolution of the population, one can call:
   let avg = genetics.getAverageFitness();
   let max = genetics.getFittest().getFitness();
 ```
-
-### Demos
-
-- [Smart Eaters](https://nathsou.github.io/Darwin/Demos/SmartEaters/) inspired by [Daniel Shiffman](http://natureofcode.com/book/chapter-9-the-evolution-of-code/)
-- [Typing Monkeys](https://nathsou.github.io/Darwin/Demos/TypingMonkeys/) inspired by [ai-junkie.com](http://www.ai-junkie.com/ann/evolved/nnt1.html)
