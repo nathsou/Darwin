@@ -4,7 +4,7 @@ Flexible genetic algorithm implementation in TypeScript.
 
 ### Demos
 
-- [Smart Eaters](https://nathsou.github.io/Darwin/Demos/SmartEaters/) inspired by [ai-junkie.com](http://www.ai-junkie.com/ann/evolved/nnt1.html)
+- [Smart Eaters](https://nathsou.github.io/Darwin/Demos/SmartEaters/) inspired by [Mat Buckland](http://www.ai-junkie.com/ann/evolved/nnt1.html)
 - [Typing Monkeys](https://nathsou.github.io/Darwin/Demos/TypingMonkeys/) inspired by [Daniel Shiffman](http://natureofcode.com/book/chapter-9-the-evolution-of-code/)
 
 
