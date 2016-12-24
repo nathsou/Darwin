@@ -338,7 +338,7 @@ class Darwin<T> {
         return this.population;
     }
 
-    public getRandomChromosome() : Chromosome<T> { //probability of being selected proportonal to fitness
+    public getRandomChromosome() : Chromosome<T> { //probability of being selected proportional to fitness
 
         //compute the sum of fitness
         let sumFitness = this.avg_fitness * this.params.population_size;
