@@ -1,0 +1,42 @@
+<html>
+    <head>
+        <title>EvoEaters</title>
+        <meta charset='utf-8'></meta>
+
+        <style>
+            * { margin:0; padding:0; } /* to remove the top and left whitespace */
+
+            html, body { width:100%; height:100%; } /* just to be sure these are full screen*/
+
+            canvas { display:block; } /* To remove the scrollbars */
+
+        </style>
+    </head>
+
+    <body>
+        
+        <canvas id='cnv'></canvas>
+        <script src='../../js/Darwin.js'></script>
+        <script src='../../js/Demos/SmartEaters/Vector2D.js'></script>
+        <script src='../../js/Demos/SmartEaters/Eaters.js'></script>
+
+        <script>
+
+            let cnv = document.querySelector('#cnv');
+            cnv.width = window.innerWidth;
+            cnv.height = window.innerHeight;
+
+            let eaters = new Eaters('#cnv', {
+                elite_count: 10,
+                elite_copies: 2,
+                ticks_per_gen: 2000,
+                population_size: 200,
+                food_count: 150
+            });
+
+            eaters.run();
+
+        </script>
+
+    </body>
+</html>

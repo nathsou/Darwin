@@ -1,0 +1,133 @@
+<html>
+    <head>
+        <title>Randomly Typing Monkeys</title>
+        <meta charset='utf-8'></meta>
+    </head>
+
+    <body>
+
+        <script src='../../js/Evolution.js'></script>
+        <script src='../../js/Demos/TypingMonkeys/EventEmitter.js'></script>
+        <script src='../../js/Demos/TypingMonkeys/TypingMonkeys.js'></script>
+
+        <input type='text' id='target' style='width: 400px;' value="https://en.wikipedia.org/wiki/Genetic_algorithm"></input>
+        <button id='search'>Go</button>
+        </br>
+        <p id='fittest' style='font-size: 24px'></p>
+        </br>
+        <div id='stats' style='font-size: 24px'></div>
+        </br>
+        <span>Population </span><input style='width: 70px;' type='number' id='population' value='200'></input>
+        </br>
+        <span>Crossover rate </span><input style='width: 70px;' type='number' id='crossover' value='70'>%</input>
+        </br>
+        <span>Mutation rate </span><input style='width: 70px;' type='number' id='mutation' value='2'>%</input>
+        </br>
+        <span>Elite count </span><input style='width: 70px;' type='number' id='elite_count' value='5'></input>
+        </br>
+        <span>Elite copies </span><input style='width: 70px;' type='number' id='elite_copies' value='2'></input>
+
+        <script id='MonkeyFactoryWorker'>
+
+            function handleEvents(factory, target) {
+
+                factory.on('new_generation', data => {
+                    self.postMessage({
+                        type: 'new_generation', 
+                        data: JSON.stringify(data)
+                    });
+                });
+
+                factory.on('finished', data => {
+                    self.postMessage({
+                        type: 'finished', 
+                        data: JSON.stringify(data)
+                    });
+                });
+
+                factory.on('time_limit', limit => {
+                    self.postMessage({
+                        type: 'time_limit',
+                        limit: limit
+                    })
+                });
+
+                factory.search(target);
+
+            }
+
+            self.onmessage = e => {
+                handleEvents(new MonkeyFactory(JSON.parse(e.data.params), e.data.time_limit), e.data.target);
+            };
+
+        </script>
+
+        <script>
+
+            let code = 
+                `let CrossoverMethod = ${JSON.stringify(CrossoverMethod)};` + 
+                Chromosome.toString() + 
+                Evolution.toString() + 
+                EventEmitter.toString() +
+                `let alphabet = ${JSON.stringify(alphabet)};` +
+                rand_char.toString() + 
+                string_dist.toString() +
+                MonkeyFactory.toString() + 
+                document.querySelector('#MonkeyFactoryWorker').textContent;
+
+            
+            let blob = new Blob([code]),
+                worker = new Worker(window.URL.createObjectURL(blob));
+
+            let fittestP = document.querySelector('#fittest'), 
+                stats = document.querySelector('#stats'); 
+
+            let max_fitness;
+
+            worker.onmessage = e => {
+
+                if (e.data.type === 'time_limit') {
+                    alert(`The time limit of ${e.data.limit / 1000} seconds is over, please tune the parameters.`);
+                    return;
+                }
+
+                let data = e.data.data;
+
+                let d = JSON.parse(data);
+                fittestP.textContent = d.fittest.bits.join('');
+                stats.innerHTML = `generation: ${d.generation}</br>
+                                   average fitness: ${(d.avg_fitness / max_fitness).toFixed(4)}%</br>
+                                   max fitness: ${(d.fittest.fitness / max_fitness).toFixed(4)}%`;
+            };
+
+            document.querySelector('#search').addEventListener('click', e => {
+
+                let target = document.querySelector('#target').value;
+
+                for (let char of target)
+                    if (alphabet.indexOf(char) === -1) {
+                        alert(`The character '${char}' cannot be used`);
+                        return;
+                    }
+
+                max_fitness = 2 ** target.length;
+
+                worker.postMessage({
+                    target: target,
+                    params: JSON.stringify({
+                        population_size: parseInt(document.querySelector('#population').value),
+                        chromosome_length: target.length,
+                        rand_func: rand_char,
+                        crossover_rate: parseInt(document.querySelector('#crossover').value) / 100,
+                        mutation_rate: parseInt(document.querySelector('#mutation').value) / 100,
+                        elite_count: parseInt(document.querySelector('#elite_count').value),
+                        elite_copies: parseInt(document.querySelector('#elite_copies').value)
+                    }),
+                    time_limit: Infinity
+                });
+            });
+
+        </script>
+
+    </body>
+</html>
