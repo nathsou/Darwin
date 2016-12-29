@@ -396,6 +396,10 @@ class Darwin<T> {
         return this.population;
     }
 
+    public getChromosome(idx: number) : Chromosome<T> {
+        return this.population[idx];
+    }
+
     public getRandomChromosome() : Chromosome<T> { //probability of being selected proportional to fitness
 
         //compute the sum of fitness

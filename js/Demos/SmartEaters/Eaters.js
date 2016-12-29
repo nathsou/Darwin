@@ -30,6 +30,7 @@ class Eaters {
         this.fast_mode_refresh_rate = 2;
         this.show_lines = false;
         this.hide_non_selected = false;
+        this.stop_mating = false;
         this.cnv = document.querySelector(cnv_selector);
         this.ctx = this.cnv.getContext('2d');
         let choose = (a, b) => {
@@ -163,6 +164,8 @@ class Eaters {
         this.paused = !this.paused;
     }
     next_gen() {
+        if (this.stop_mating)
+            return;
         this.genetics.mate();
         this.spawnFood();
         for (let eater of this.population)
@@ -262,6 +265,15 @@ class Eaters {
         this.follow_fittest = false;
         this.selected_idx = index;
     }
+    getSelected() {
+        return this.population[this.selected_idx];
+    }
+    getEater(idx) {
+        return this.population[idx];
+    }
+    getEaterBrain(idx) {
+        return NeuralNet.fromWeights(this.layer_sizes, this.genetics.getChromosome(this.population[idx].getChromosomeIdx()).getBits()).toFunction();
+    }
     toggleFastMode() {
         this.fast_mode = !this.fast_mode;
     }
@@ -270,6 +282,9 @@ class Eaters {
     }
     getFittestBrain() {
         return NeuralNet.fromWeights(this.layer_sizes, this.genetics.getFittest().getBits()).toFunction();
+    }
+    toggleMating() {
+        this.stop_mating = !this.stop_mating;
     }
 }
 let MathUtils = {

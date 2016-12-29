@@ -63,6 +63,7 @@ class Eaters {
     public fast_mode_refresh_rate = 2;
     public show_lines = false;
     public hide_non_selected = false;
+    public stop_mating = false;
 
     constructor(cnv_selector: string, private params?: EatersParams) {
         this.cnv = document.querySelector(cnv_selector) as HTMLCanvasElement;
@@ -193,7 +194,6 @@ class Eaters {
                 Math.sin(eater.getAngle())
             ];
 
-
             let [turn_left, turn_right] = this.brain.run(...lookat, food_l, food_r);
 
             let rot_force = MathUtils.clamp(turn_left - turn_right, -this.params.max_turn_rate, this.params.max_turn_rate);
@@ -228,6 +228,8 @@ class Eaters {
     }
 
     private next_gen() : void {
+
+        if (this.stop_mating) return;
 
         this.genetics.mate();
         this.spawnFood();
@@ -358,6 +360,18 @@ class Eaters {
         this.selected_idx = index;
     }
 
+    public getSelected() : Eater {
+        return this.population[this.selected_idx];
+    }
+
+    public getEater(idx: number) : Eater {
+        return this.population[idx];
+    }
+
+    public getEaterBrain(idx: number) : Function {
+        return NeuralNet.fromWeights(this.layer_sizes, this.genetics.getChromosome(this.population[idx].getChromosomeIdx()).getBits()).toFunction();
+    }
+
     public toggleFastMode() : void {
         this.fast_mode = !this.fast_mode;
     }
@@ -368,6 +382,10 @@ class Eaters {
 
     public getFittestBrain() : Function {
         return NeuralNet.fromWeights(this.layer_sizes, this.genetics.getFittest().getBits()).toFunction();
+    }
+
+    public toggleMating() : void {
+        this.stop_mating = !this.stop_mating;
     }
 
 }

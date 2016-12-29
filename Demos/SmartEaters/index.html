@@ -27,12 +27,15 @@
             canvas.height = window.innerHeight;
 
             let eaters = new Eaters('#cnv', {
-                elite_count: 10,
+                elite_count: 5,
                 elite_copies: 2,
                 ticks_per_gen: 2000,
-                population_size: 200,
-                food_count: 170,
-                crossover_method: CrossoverMethod.TWO_POINT
+                population_size: 100,
+                food_count: 120,
+                crossover_method: CrossoverMethod.TWO_POINT,
+                wrap_borders: true,
+                mutation_rate: 0.02,
+                hidden_layers_sizes: [8]
             });
 
             eaters.run();
@@ -43,32 +46,43 @@
             });
 
             window.addEventListener('keypress', e => {
-                switch (e.keyCode) {
+                switch (e.key) {
 
-                    case 32: //SPACE
+                    case " ": //SPACE
                         eaters.pause();
                         break;
 
-                    case 102: //F
-                        eaters.follow_fittest = true;
+                    case "f": //follow the fittest eater
+                        eaters.follow_fittest = !eaters.follow_fittest;
                         break;
 
-                    case 112: //p
+                    case "p": //decrement fresh rate
                         eaters.fast_mode_refresh_rate += 2;
                         break;
                     
-                    case 109: //m 
+                    case "m": //increment fresh rate
                         eaters.fast_mode_refresh_rate -= 2;
                         if (eaters.fast_mode_refresh_rate < 1)
                             eaters.fast_mode_refresh_rate = 1;
                         break;
 
-                    case 108: //l
+                    case "l": //draw lines to the nearest food for each eater
                         eaters.show_lines = !eaters.show_lines;
                         break;
 
-                    case 104: //h
+                    case "h": //hide all eaters but the selected one
                         eaters.hide_non_selected = !eaters.hide_non_selected;
+                        break;
+
+                    case "a": //isolate the selected eater
+                        if (eaters.selected_idx) {
+                            let b = window.URL.createObjectURL(new Blob([`
+                                let params = ${JSON.stringify(eaters.params)};
+                                ${eaters.getEaterBrain(eaters.selected_idx).toString().replace('anonymous', 'brain')};
+                            `]));
+
+                            window.open(`analysis.html?b=${b}`);
+                        }
                         break;
 
                     default:
@@ -76,7 +90,6 @@
                         break;
                 }
             });
-
 
         </script>
 

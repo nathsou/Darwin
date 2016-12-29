@@ -270,6 +270,9 @@ class Darwin {
     getPopulation() {
         return this.population;
     }
+    getChromosome(idx) {
+        return this.population[idx];
+    }
     getRandomChromosome() {
         //compute the sum of fitness
         let sumFitness = this.avg_fitness * this.params.population_size;
