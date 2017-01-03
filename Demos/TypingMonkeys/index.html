@@ -15,7 +15,7 @@
         </br>
         <p id='fittest' style='font-size: 24px'></p>
         </br>
-        <div id='stats' style='font-size: 24px'></div>
+        <div id='statsDiv' style='font-size: 24px'></div>
         </br>
         <span>Population </span><input style='width: 70px;' type='number' id='population' value='200'></input>
         </br>
@@ -80,7 +80,7 @@
                 worker = new Worker(window.URL.createObjectURL(blob));
 
             let fittestP = document.querySelector('#fittest'), 
-                stats = document.querySelector('#stats'); 
+                stats = document.querySelector('#statsDiv'); 
 
             let max_fitness;
 
@@ -110,7 +110,7 @@
                         return;
                     }
 
-                max_fitness = 2 ** target.length;
+                max_fitness = Math.pow(2, target.length);
 
                 worker.postMessage({
                     target: target,

@@ -4,7 +4,13 @@ enum CrossoverMethod {
     SINGLE_POINT,
     TWO_POINT,
     UNIFORM,
-    HALF_UNIFORM
+    HALF_UNIFORM,
+    ORDERED
+}
+
+enum MutationMethod {
+    FLIP,
+    SWAP
 }
 
 class NeuralNet { //minified version, only implements feedforwarding
@@ -171,13 +177,34 @@ class Chromosome<T> {
             return count;
     }
 
-    public mutate(randFunc: () => T, flipProbability = 1 / this.length) : void {
+    public mutate(randFunc: () => T, mut_rate = 1 / this.length, method = MutationMethod.FLIP) : void {
 
         if (this.locked) return;
 
-        for (let i = 0; i < this.length; i++)
-            if (Math.random() < flipProbability)
-                this.bits[i] = randFunc();
+        switch(method) {
+
+            case MutationMethod.FLIP:
+
+                for (let i = 0; i < this.length; i++)
+                    if (Math.random() < mut_rate)
+                        this.bits[i] = randFunc();
+                break;
+
+            case MutationMethod.SWAP:
+
+                for (let i = 0; i < this.length; i++) {
+                    if (Math.random() < mut_rate) {
+                        let j = Math.floor(Math.random() * this.length),
+                            tmp = this.bits[i];
+
+                        this.bits[i] = this.bits[j];
+                        this.bits[j] = tmp;
+                    }
+                }
+
+                break;
+
+        }
     }
 
     public crossover(bob: Chromosome<T>, method: CrossoverMethod = CrossoverMethod.SINGLE_POINT) : {
@@ -235,23 +262,62 @@ class Chromosome<T> {
 
             case CrossoverMethod.HALF_UNIFORM: 
 
-            let diff_bits: number[] = [];
+                let diff_bits: number[] = [];
 
-            for (let i = 0; i < this.length; i++)
-                if (this.bits[i] !== bob.bits[i])
-                    diff_bits.push(i);
+                for (let i = 0; i < this.length; i++)
+                    if (this.bits[i] !== bob.bits[i])
+                        diff_bits.push(i);
 
-            let N = diff_bits.length;
+                let N = diff_bits.length;
 
-            b1 = this.bits.slice();
-            b2 = bob.bits.slice();
+                b1 = this.bits.slice();
+                b2 = bob.bits.slice();
 
-            for (let i = 0; i < N / 2; i++) {
-                let idx = Math.floor(Math.random() * diff_bits.length);
-                b1[diff_bits[idx]] = bob.bits[diff_bits[idx]];
-                b2[diff_bits[idx]] = this.bits[diff_bits[idx]];
-                diff_bits.splice(idx, 1);
-            }
+                for (let i = 0; i < N / 2; i++) {
+                    let idx = Math.floor(Math.random() * diff_bits.length);
+                    b1[diff_bits[idx]] = bob.bits[diff_bits[idx]];
+                    b2[diff_bits[idx]] = this.bits[diff_bits[idx]];
+                    diff_bits.splice(idx, 1);
+                }
+
+                break;
+
+            case CrossoverMethod.ORDERED:
+
+                let inf = Math.floor(Math.random() * this.length),
+                    sup = Math.floor(Math.random() * this.length),
+                    tmp = inf;
+
+                inf = Math.min(inf, sup);
+                sup = Math.max(tmp, sup);
+
+                for (let i = inf; i < sup; i++) {
+                    b1[i] = (inf <= i && i <= sup) ? bob.bits[i] : undefined;
+                    b2[i] = (inf <= i && i <= sup) ? this.bits[i] : undefined;
+                }
+
+                for (let i = 0; i < this.length; i++) {
+                    if (b1.indexOf(this.bits[i]) === -1) 
+                        b1[i] = this.bits[i];
+                    else {
+                        for (let j = 0; j < this.length; j++) {
+                            if (b1.indexOf(this.bits[j]) === -1)
+                                b1[i] = this.bits[j];
+                        }
+                    }
+
+                    if (b2.indexOf(bob.bits[i]) === -1) 
+                        b2[i] = bob.bits[i];
+                    else {
+                        for (let j = 0; j < this.length; j++) {
+                            if (b2.indexOf(bob.bits[j]) === -1)
+                                b2[i] = bob.bits[j];
+                        }
+                    }
+
+                }
+
+                break;
 
         }
 
@@ -305,6 +371,7 @@ interface DarwinParams<T> {
     crossover_rate?: number,
     mutation_rate?: number,
     crossover_method?: CrossoverMethod,
+    mutation_method?: MutationMethod,
     elite_count?: number,
     elite_copies?: number
 }
@@ -325,8 +392,9 @@ class Darwin<T> {
         this.fittest = this.population[0];
 
         this.params.crossover_rate = this.params.crossover_rate || 0.7;
-        this.params.mutation_rate = this.params.mutation_rate || 0.01;
+        this.params.mutation_rate = this.params.mutation_rate || 1 / this.params.chromosome_length;
         this.params.crossover_method = this.params.crossover_method || CrossoverMethod.SINGLE_POINT;
+        this.params.mutation_method = this.params.mutation_method || MutationMethod.FLIP;
         this.params.elite_count = this.params.elite_count || 0;//Math.floor(this.params.population_size / 25);
         this.params.elite_copies = this.params.elite_copies || 1;
     }
@@ -365,7 +433,7 @@ class Darwin<T> {
                 let mum = this.getRandomChromosome(),
                     dad = this.getRandomChromosome();
 
-                let babies = mum.crossover(dad);
+                let babies = mum.crossover(dad, this.params.crossover_method);
 
                 let baby1 = new Chromosome<T>(this.params.chromosome_length, this.params.rand_func),
                     baby2 = new Chromosome<T>(this.params.chromosome_length, this.params.rand_func);
@@ -382,7 +450,7 @@ class Darwin<T> {
 
         //mutate
         for (let c of new_pop) {
-            c.mutate(this.params.rand_func, this.params.mutation_rate);
+            c.mutate(this.params.rand_func, this.params.mutation_rate, this.params.mutation_method);
             c.setFitness(0); //reset fitness
         }
 
@@ -425,6 +493,10 @@ class Darwin<T> {
     public getFittest() : Chromosome<T> {
         return this.fittest;
     }
+
+    public getParams() : DarwinParams<T> {
+        return this.params;
+    } 
 
     public updateStats() : void {
         //compute the average fitness of the population

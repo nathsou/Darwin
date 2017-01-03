@@ -1,0 +1,43 @@
+<html>
+
+    <head>
+        <title>Traveling Salesman</title>
+        <meta charset='utf-8'></meta>
+    </head>
+
+    <body>
+        
+        <canvas id='cnv'></canvas>
+
+        <script src='../../js/Darwin.js'></script>
+        <script src='../../js/Demos/TravelingSalesman/TSP.js'></script>
+        <script src='../../js/Demos/TravelingSalesman/TSP_Optimizer.js'></script>
+
+        <script>
+
+            let cnv = document.querySelector('#cnv'),
+                ctx = cnv.getContext('2d');
+
+            cnv.width = window.innerWidth;
+            cnv.height = window.innerHeight;
+
+            let cities = [];
+
+            for (let i = 0; i < 25; i++) {
+                cities.push({
+                    x: Math.floor(Math.random() * cnv.width),
+                    y: Math.floor(Math.random() * cnv.height)
+                });
+            }
+
+            let tsp_opt = new TSP_Optimizer(cities);
+
+            console.log(`shortest: ${JSON.stringify(tsp_opt.optimize())}, generation: ${tsp_opt.genetics.generation}`);
+
+            tsp_opt.drawShortestPath(ctx);
+
+        </script>
+
+    </body>
+
+</html>

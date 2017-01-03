@@ -5,7 +5,13 @@ var CrossoverMethod;
     CrossoverMethod[CrossoverMethod["TWO_POINT"] = 1] = "TWO_POINT";
     CrossoverMethod[CrossoverMethod["UNIFORM"] = 2] = "UNIFORM";
     CrossoverMethod[CrossoverMethod["HALF_UNIFORM"] = 3] = "HALF_UNIFORM";
+    CrossoverMethod[CrossoverMethod["ORDERED"] = 4] = "ORDERED";
 })(CrossoverMethod || (CrossoverMethod = {}));
+var MutationMethod;
+(function (MutationMethod) {
+    MutationMethod[MutationMethod["FLIP"] = 0] = "FLIP";
+    MutationMethod[MutationMethod["SWAP"] = 1] = "SWAP";
+})(MutationMethod || (MutationMethod = {}));
 class NeuralNet {
     constructor() {
         this.weights_and_biases = [];
@@ -120,12 +126,25 @@ class Chromosome {
             count += this.bits[i] !== bob.bits[i] ? 1 : 0;
         return count;
     }
-    mutate(randFunc, flipProbability = 1 / this.length) {
+    mutate(randFunc, mut_rate = 1 / this.length, method = MutationMethod.FLIP) {
         if (this.locked)
             return;
-        for (let i = 0; i < this.length; i++)
-            if (Math.random() < flipProbability)
-                this.bits[i] = randFunc();
+        switch (method) {
+            case MutationMethod.FLIP:
+                for (let i = 0; i < this.length; i++)
+                    if (Math.random() < mut_rate)
+                        this.bits[i] = randFunc();
+                break;
+            case MutationMethod.SWAP:
+                for (let i = 0; i < this.length; i++) {
+                    if (Math.random() < mut_rate) {
+                        let j = Math.floor(Math.random() * this.length), tmp = this.bits[i];
+                        this.bits[i] = this.bits[j];
+                        this.bits[j] = tmp;
+                    }
+                }
+                break;
+        }
     }
     crossover(bob, method = CrossoverMethod.SINGLE_POINT) {
         if (this.locked || bob.locked)
@@ -175,6 +194,34 @@ class Chromosome {
                     b2[diff_bits[idx]] = this.bits[diff_bits[idx]];
                     diff_bits.splice(idx, 1);
                 }
+                break;
+            case CrossoverMethod.ORDERED:
+                let inf = Math.floor(Math.random() * this.length), sup = Math.floor(Math.random() * this.length), tmp = inf;
+                inf = Math.min(inf, sup);
+                sup = Math.max(tmp, sup);
+                for (let i = inf; i < sup; i++) {
+                    b1[i] = (inf <= i && i <= sup) ? bob.bits[i] : undefined;
+                    b2[i] = (inf <= i && i <= sup) ? this.bits[i] : undefined;
+                }
+                for (let i = 0; i < this.length; i++) {
+                    if (b1.indexOf(this.bits[i]) === -1)
+                        b1[i] = this.bits[i];
+                    else {
+                        for (let j = 0; j < this.length; j++) {
+                            if (b1.indexOf(this.bits[j]) === -1)
+                                b1[i] = this.bits[j];
+                        }
+                    }
+                    if (b2.indexOf(bob.bits[i]) === -1)
+                        b2[i] = bob.bits[i];
+                    else {
+                        for (let j = 0; j < this.length; j++) {
+                            if (b2.indexOf(bob.bits[j]) === -1)
+                                b2[i] = bob.bits[j];
+                        }
+                    }
+                }
+                break;
         }
         return {
             baby1: b1,
@@ -219,8 +266,9 @@ class Darwin {
         //select an arbitrary chromosome to start with
         this.fittest = this.population[0];
         this.params.crossover_rate = this.params.crossover_rate || 0.7;
-        this.params.mutation_rate = this.params.mutation_rate || 0.01;
+        this.params.mutation_rate = this.params.mutation_rate || 1 / this.params.chromosome_length;
         this.params.crossover_method = this.params.crossover_method || CrossoverMethod.SINGLE_POINT;
+        this.params.mutation_method = this.params.mutation_method || MutationMethod.FLIP;
         this.params.elite_count = this.params.elite_count || 0; //Math.floor(this.params.population_size / 25);
         this.params.elite_copies = this.params.elite_copies || 1;
     }
@@ -248,7 +296,7 @@ class Darwin {
         while (new_pop.length < this.params.population_size) {
             if (Math.random() < this.params.crossover_rate) {
                 let mum = this.getRandomChromosome(), dad = this.getRandomChromosome();
-                let babies = mum.crossover(dad);
+                let babies = mum.crossover(dad, this.params.crossover_method);
                 let baby1 = new Chromosome(this.params.chromosome_length, this.params.rand_func), baby2 = new Chromosome(this.params.chromosome_length, this.params.rand_func);
                 baby1.setBits(babies.baby1);
                 baby2.setBits(babies.baby2);
@@ -260,7 +308,7 @@ class Darwin {
             new_pop.pop();
         //mutate
         for (let c of new_pop) {
-            c.mutate(this.params.rand_func, this.params.mutation_rate);
+            c.mutate(this.params.rand_func, this.params.mutation_rate, this.params.mutation_method);
             c.setFitness(0); //reset fitness
         }
         //uptate the population
@@ -291,6 +339,9 @@ class Darwin {
     }
     getFittest() {
         return this.fittest;
+    }
+    getParams() {
+        return this.params;
     }
     updateStats() {
         //compute the average fitness of the population
