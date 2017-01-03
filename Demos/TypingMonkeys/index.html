@@ -7,7 +7,7 @@
     <body>
 
         <script src='../../js/Darwin.js'></script>
-        <script src='../../js/Demos/TypingMonkeys/EventEmitter.js'></script>
+        <script src='../../js/Demos/EventEmitter.js'></script>
         <script src='../../js/Demos/TypingMonkeys/TypingMonkeys.js'></script>
 
         <input type='text' id='target' style='width: 400px;' value="https://en.wikipedia.org/wiki/Genetic_algorithm"></input>
@@ -66,6 +66,7 @@
 
             let code = 
                 `let CrossoverMethod = ${JSON.stringify(CrossoverMethod)};` + 
+                `let MutationMethod = ${JSON.stringify(MutationMethod)};` + 
                 Chromosome.toString() + 
                 Darwin.toString() + 
                 EventEmitter.toString() +

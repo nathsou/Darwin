@@ -26,24 +26,43 @@ class TSP_Optimizer {
         }
         return a;
     }
-    optimize() {
-        let fittest = 0, gen_fittest = 0;
-        while (this.genetics.generation < 1000) {
-            if (gen_fittest >= 10)
-                break;
-            for (let path of this.genetics.getPopulation()) {
-                path.setFitness(Math.exp(10000000 / this.tsp.distance_squared(path.getBits())));
-            }
-            if (this.genetics.generation % 100 === 0)
-                console.log(`generation ${this.genetics.generation},
-                             fittest: ${this.genetics.getFittest().getFitness().toFixed(4)}
-                             avg: ${this.genetics.getAverageFitness().toFixed(4)}`);
-            this.genetics.mate();
-            if (fittest === this.genetics.getFittest().getFitness())
-                gen_fittest++;
-            else {
-                fittest = this.genetics.getFittest().getFitness();
-                gen_fittest = 0;
+    newGen() {
+        for (let path of this.genetics.getPopulation())
+            path.setFitness(Math.exp(10000000 / this.tsp.distance_squared(path.getBits())));
+        if (this.genetics.generation % 100 === 0)
+            console.log(`generation ${this.genetics.generation},
+                            fittest: ${this.genetics.getFittest().getFitness().toFixed(4)}
+                            avg: ${this.genetics.getAverageFitness().toFixed(4)}`);
+        this.genetics.mate();
+    }
+    optimize(ctx) {
+        let fittest = 0, count = 0;
+        if (ctx) {
+            let update = () => {
+                if (count === 10 || this.genetics.generation === 1000)
+                    return;
+                this.newGen();
+                if (fittest === this.genetics.getFittest().getFitness())
+                    count++;
+                else {
+                    fittest = this.genetics.getFittest().getFitness();
+                    count = 0;
+                    this.drawShortestPath(ctx);
+                }
+                requestAnimationFrame(update);
+            };
+            update();
+        }
+        else {
+            while (this.genetics.generation !== 1000 && count !== 10) {
+                this.newGen();
+                if (fittest === this.genetics.getFittest().getFitness())
+                    count++;
+                else {
+                    fittest = this.genetics.getFittest().getFitness();
+                    count = 0;
+                    this.drawShortestPath(ctx);
+                }
             }
         }
         return this.genetics.getFittest().getBits();

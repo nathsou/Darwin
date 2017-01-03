@@ -32,9 +32,9 @@
 
             let tsp_opt = new TSP_Optimizer(cities);
 
-            console.log(`shortest: ${JSON.stringify(tsp_opt.optimize())}, generation: ${tsp_opt.genetics.generation}`);
+            console.log(`shortest: ${JSON.stringify(tsp_opt.optimize(ctx))}, generation: ${tsp_opt.genetics.generation}`);
 
-            tsp_opt.drawShortestPath(ctx);
+            tsp_opt.tsp.drawShortestPath(ctx);
 
         </script>
 

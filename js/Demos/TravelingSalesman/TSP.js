@@ -45,6 +45,7 @@ class TSP {
     draw(ctx, path) {
         if (path.length !== this.cities.length)
             throw new Error(`Each city must be visited`);
+        ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
         ctx.fillStyle = '#01cc33';
         for (let city of this.cities) {
             ctx.beginPath();
