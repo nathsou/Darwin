@@ -7,6 +7,9 @@ class TSP_Optimizer {
     private tsp: TSP;
     private shuffled = [];
     private model = [];
+    private convergence_treshold = 20;
+    private max_generation = 5000;
+    private fitness_k = 15;
 
     constructor(cities: Point[] = []) {
         this.cities = cities;
@@ -17,7 +20,7 @@ class TSP_Optimizer {
             this.model[i] = i;
 
         this.genetics = new Darwin<number>({
-            population_size: 200,
+            population_size: 500,
             chromosome_length: this.CITY_COUNT,
             rand_func: (() => {
                 if (this.shuffled.length === 0)
@@ -28,6 +31,11 @@ class TSP_Optimizer {
             crossover_method: CrossoverMethod.ORDERED,
             mutation_method: MutationMethod.SWAP  
         });
+
+         let rect_w = cities.reduce((a: number, b: Point) => a > b.x ? a : b.x, 0),
+             rect_h = cities.reduce((a: number, b: Point) => a > b.y ? a : b.y, 0);
+
+        this.fitness_k *= avg_dist_rect(rect_w, rect_h) * this.CITY_COUNT;
     }
 
     static shuffle(a: number[]) : number[] {
@@ -42,8 +50,10 @@ class TSP_Optimizer {
 
     private newGen() : void {
 
-        for (let path of this.genetics.getPopulation())
-            path.setFitness(Math.exp(10000000 / this.tsp.distance_squared(path.getBits())));
+        for (let path of this.genetics.getPopulation()) {
+            let d = this.tsp.distance(path.getBits());
+            path.setFitness(2 ** ((this.fitness_k / d)));
+        }
 
         if (this.genetics.generation % 100 === 0) 
             console.log(`generation ${this.genetics.generation},
@@ -63,7 +73,7 @@ class TSP_Optimizer {
 
             let update = () => {
 
-                if (count === 10 || this.genetics.generation === 1000) return;
+                if (count === this.convergence_treshold || this.genetics.generation === this.max_generation) return;
 
                 this.newGen();
                 if (fittest === this.genetics.getFittest().getFitness())
@@ -80,7 +90,7 @@ class TSP_Optimizer {
             update();
 
         } else {
-            while(this.genetics.generation !== 1000 && count !== 10) {
+            while(this.genetics.generation !== this.max_generation && count !== this.convergence_treshold) {
                 this.newGen();
 
                 if (fittest === this.genetics.getFittest().getFitness())
@@ -88,7 +98,6 @@ class TSP_Optimizer {
                 else {
                     fittest = this.genetics.getFittest().getFitness();
                     count = 0;
-                    this.drawShortestPath(ctx);
                 }
             }
         }
@@ -100,6 +109,23 @@ class TSP_Optimizer {
 
     public drawShortestPath(ctx: CanvasRenderingContext2D) : void {
         this.tsp.draw(ctx, this.genetics.getFittest().getBits());
+
+        ctx.fillStyle = 'black';
+        ctx.fillText(`generation ${this.genetics.generation}`, 5, 15);
     }
 
+}
+
+//http://www.math.uni-muenster.de/reine/u/burgstal/d18.pdf
+function avg_dist_rect(w, h) {
+	
+  let w2 = w ** 2,
+  	  w3 = w ** 3,
+      h2 = h ** 2,
+      h3 = h ** 3,
+      d = (w2 + h2) ** 0.5;
+      
+      return (1 / 15) * (w3 / h2 + h3 / w2 + d *
+              (3 - w2 / h2 - h2 / w2) + 2.5 * ((h2 / w) *
+      Math.log((w + d) / h) + (w2 / h) * Math.log((h + d) / w)));
 }

@@ -1,12 +1,21 @@
 class TSP {
     constructor(cities) {
         this.cities = cities;
+        this.dist_map = new Map();
     }
-    static dist2D(p1, p2) {
-        return Math.sqrt((Math.pow((p1.x - p2.x), 2) + Math.pow((p1.y - p2.y), 2)));
+    dist2D(cityA, cityB) {
+        return Math.pow(this.dist2D_squared(cityA, cityB), 0.5);
     }
-    static dist2D_squared(p1, p2) {
-        return (Math.pow((p1.x - p2.x), 2) + Math.pow((p1.y - p2.y), 2));
+    dist2D_squared(cityA, cityB) {
+        let c = [cityA, cityB].sort(), key = `${c[0]}-${c[1]}`;
+        if (this.dist_map.has(key))
+            return this.dist_map.get(key);
+        else {
+            let p1 = this.cities[cityA], p2 = this.cities[cityB];
+            let dist_sq = (Math.pow((p1.x - p2.x), 2) + Math.pow((p1.y - p2.y), 2));
+            this.dist_map.set(key, dist_sq);
+            return dist_sq;
+        }
     }
     checkPathValidity(path) {
         if (path.length !== this.cities.length)
@@ -25,7 +34,7 @@ class TSP {
             throw new Error(`Invalid path: Each city must be visited exactly once.`);
         let dist = 0;
         for (let i = 1; i < path.length; i++)
-            dist += TSP.dist2D(this.cities[path[i - 1]], this.cities[path[i]]);
+            dist += this.dist2D(path[i - 1], path[i]);
         return dist;
     }
     distance_squared(path) {
@@ -33,7 +42,7 @@ class TSP {
             throw new Error(`Invalid path: Each city must be visited exactly once.`);
         let dist = 0;
         for (let i = 1; i < path.length; i++)
-            dist += TSP.dist2D_squared(this.cities[path[i - 1]], this.cities[path[i]]);
+            dist += this.dist2D_squared(path[i - 1], path[i]);
         return dist;
     }
     getCities() {
