@@ -105,14 +105,20 @@ class NeuralNet {
     }
 }
 class Chromosome {
-    constructor(length, randFunc) {
-        this.length = length;
+    constructor(length_or_bits, randFunc) {
         this.randFunc = randFunc;
         this.bits = [];
         this.fitness = 0;
         this.locked = false; //prevent from changing
-        for (let i = 0; i < length; i++)
-            this.bits.push(randFunc());
+        if (typeof length_or_bits === 'number') {
+            this.length = length_or_bits;
+            for (let i = 0; i < this.length; i++)
+                this.bits.push(randFunc());
+        }
+        else {
+            this.bits = length_or_bits;
+            this.length = length_or_bits.length;
+        }
     }
     getFitness() {
         return this.fitness;
@@ -297,9 +303,7 @@ class Darwin {
             if (Math.random() < this.params.crossover_rate) {
                 let mum = this.getRandomChromosome(), dad = this.getRandomChromosome();
                 let babies = mum.crossover(dad, this.params.crossover_method);
-                let baby1 = new Chromosome(this.params.chromosome_length, this.params.rand_func), baby2 = new Chromosome(this.params.chromosome_length, this.params.rand_func);
-                baby1.setBits(babies.baby1);
-                baby2.setBits(babies.baby2);
+                let baby1 = new Chromosome(babies.baby1, this.params.rand_func), baby2 = new Chromosome(babies.baby2, this.params.rand_func);
                 new_pop.push(baby1, baby2);
             }
         }

@@ -182,8 +182,8 @@ class Eaters {
             let [food_l, food_r] = this.food[closest_food.index].sub(eater.getPosition()).normalize().toArray();
 
             if (closest_food.dist < (this.params.eater_size + this.params.food_size) / 2) { //snack time!
-                let f = chromo.getFitness();
-                chromo.setFitness(f + 1);
+                let f = chromo.getFitness() || 1;
+                chromo.setFitness(2 * f);
                 this.food[closest_food.index] = this.randomPos();
             }
 
@@ -276,7 +276,7 @@ class Eaters {
 
         let c1 = [46, 204, 113],
             c2 = [255, 0, 0],
-            max = this.genetics.getFittest().getFitness(),
+            max = Math.log2(this.genetics.getFittest().getFitness()),
             i = 0;
 
 
@@ -284,7 +284,7 @@ class Eaters {
 
             if (this.hide_non_selected && this.selected_idx && i++ !== this.selected_idx) continue;
 
-            let fitness = this.genetics.getPopulation()[eater.getChromosomeIdx()].getFitness();
+            let fitness = Math.log2(this.genetics.getPopulation()[eater.getChromosomeIdx()].getFitness());
             
             let c = [
                 MathUtils.clamp(MathUtils.map(fitness, 0, max, c1[0], c2[0]), Math.min(c1[0], c2[0]), Math.max(c1[0], c2[0])),
@@ -349,8 +349,8 @@ class Eaters {
 
         this.ctx.fillStyle = 'black';
         this.ctx.fillText(`Generation: ${this.genetics.generation}`, 5, 10);
-        this.ctx.fillText(`avg fitness: ${this.genetics.getAverageFitness().toFixed(4)}`, 5, 25);
-        this.ctx.fillText(`best: ${this.genetics.getFittest().getFitness()}`, 5, 40);
+        this.ctx.fillText(`avg fitness: ${Math.log2(this.genetics.getAverageFitness()).toFixed(4)}`, 5, 25);
+        this.ctx.fillText(`best: ${Math.log2(this.genetics.getFittest().getFitness())}`, 5, 40);
         this.ctx.fillText(`ticks: ${this.ticks} / ${this.params.ticks_per_gen}`, 5, 55);
 
     }

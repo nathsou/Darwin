@@ -24,6 +24,7 @@ On the other hand, the 'Smart Eaters' demo evolves the weights and biases of an 
     crossover_rate?: number,
     mutation_rate?: number,
     crossover_method?: CrossoverMethod,
+    mutation_method?: MutationMethod,
     elite_count?: number,
     elite_copies?: number
   });
