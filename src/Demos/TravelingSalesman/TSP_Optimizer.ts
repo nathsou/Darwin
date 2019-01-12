@@ -14,6 +14,7 @@ export class TSP_Optimizer {
     private convergence_treshold = 30;
     private max_generation = 5000;
     private fitness_k = 15;
+    private best_path: number[];
 
     constructor(cities: Point[] = []) {
         this.CITY_COUNT = cities.length;
@@ -41,52 +42,52 @@ export class TSP_Optimizer {
             rect_h = cities.reduce((a: number, b: Point) => a > b.y ? a : b.y, 0);
 
         this.fitness_k *= avg_dist_rect(rect_w, rect_h) * this.CITY_COUNT;
+        this.best_path = this.genetics.getFittest().getBits();
+    }
+
+    private pathFitness(path: number[]): number {
+        return 2 ** (this.fitness_k / this.tsp.distance(path));
+    }
+
+    private distanceFromFitness(fitness: number): number {
+        return this.fitness_k / Math.log2(fitness);
     }
 
     private newGen(): void {
-
-        this.genetics.updateFitness(path => {
-            const d = this.tsp.distance(path);
-            return 2 ** ((this.fitness_k / d));
-        });
-
+        this.genetics.updateFitness(path => this.pathFitness(path));
         this.genetics.mate();
-
-        if (this.genetics.getGeneration() % 100 === 0) {
-            console.log(`generation ${this.genetics.getGeneration()},
-                            fittest: ${this.genetics.getFittest().getFitness().toFixed(4)}
-                            avg: ${this.genetics.getAverageFitness().toFixed(4)}`
-            );
-        }
-
     }
 
     public *optimize(): IterableIterator<number[]> {
 
-        let fittest = 0, count = 0;
+        let min_dist = Infinity, count = 0;
 
         while (this.genetics.getGeneration() !== this.max_generation && count !== this.convergence_treshold) {
             this.newGen();
+            const fittest = this.genetics.getFittest();
 
-            if (fittest === this.genetics.getFittest().getFitness()) {
+            const dist = this.tsp.distance_squared(fittest.getBits()) // this.distanceFromFitness(fittest.getFitness());
+            if (dist >= min_dist) {
                 count++;
             } else {
-                fittest = this.genetics.getFittest().getFitness();
+                min_dist = dist;
+                this.best_path = [...fittest.getBits()];
                 count = 0;
             }
 
-            yield this.genetics.getFittest().getBits();
+            yield this.best_path;
         }
 
-        return this.genetics.getFittest().getBits();
+        return this.best_path;
 
     }
 
     public drawShortestPath(ctx: CanvasRenderingContext2D): void {
-        this.tsp.draw(ctx, this.genetics.getFittest().getBits());
+        this.tsp.draw(ctx, this.best_path);
 
         ctx.fillStyle = 'black';
-        ctx.fillText(`generation ${this.genetics.getGeneration()}`, 5, 15);
+        ctx.fillText(`generation : ${this.genetics.getGeneration()}`, 5, 15);
+        ctx.fillText(`avg dist : ${this.distanceFromFitness(this.genetics.getAverageFitness()).toFixed(0)}`, 5, 30);
     }
 
     public getGeneration(): number {

@@ -145,10 +145,7 @@ export class Darwin<T> {
     }
 
     public getRandomChromosome(): Chromosome<T> { // probability of being selected proportional to fitness
-
-        if (this.stats.needs_update) {
-            this.updateStats();
-        }
+        this.updateStats();
 
         if (this.stats.sum_fitness === 0) {
             return this.population[Math.floor(Math.random() * this.population.length)];
@@ -165,6 +162,9 @@ export class Darwin<T> {
                 return this.population[i];
             }
         }
+
+        // this should never happend
+        return this.population[0];
     }
 
     public getTopChromosomes(count: number): Chromosome<T>[] {

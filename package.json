@@ -2,7 +2,7 @@
   "name": "charles.darwin",
   "module": "lib/js/Darwin.js",
   "types": "lib/types/Darwin.d.ts",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Flexible Genetic Algorithm Library",
   "scripts": {
     "start": "webpack-dev-server --mode development -d",

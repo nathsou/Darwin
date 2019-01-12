@@ -249,7 +249,7 @@ export class SmartEaters {
 
         if (this.fast_mode && this.ticks % this.fast_mode_refresh_rate !== 0) return;
 
-        this.genetics.updateStats();
+        this.genetics.updateStats(true);
 
         this.ctx.clearRect(0, 0, this.cnv.width, this.cnv.height);
 
