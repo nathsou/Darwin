@@ -5,7 +5,7 @@ Flexible genetic algorithm implementation in TypeScript.
 ## Installation
 
 ```bash
-npm install darwinjs
+npm install charles.darwin
 ```
 
 Darwin is compatible with ES6 modules
