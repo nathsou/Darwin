@@ -17,6 +17,7 @@ export interface DarwinParams<T> {
 
 export interface DarwinStats<T> {
     fittest: Chromosome<T>,
+    fittest_idx: number,
     avg_fitness: number,
     sum_fitness: number,
     needs_update: boolean
@@ -55,6 +56,7 @@ export class Darwin<T> {
             fittest: this.population[0],
             avg_fitness: 0,
             sum_fitness: 0,
+            fittest_idx: 0,
             needs_update: true
         };
 
@@ -219,6 +221,7 @@ export class Darwin<T> {
             this.stats.sum_fitness = sum_fitness;
             this.stats.avg_fitness = sum_fitness / this.params.population_size;
             this.stats.fittest = this.population[fittest_idx].clone();
+            this.stats.fittest_idx = fittest_idx;
             this.stats.needs_update = false;
         }
     }

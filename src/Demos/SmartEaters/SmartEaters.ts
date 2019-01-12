@@ -34,7 +34,7 @@ export class SmartEaters {
     private food: Vector2D[];
     private ticks = 0;
     private layer_sizes: number[];
-    private selected_idx: number;
+    private selected_idx = -1;
     public follow_fittest = false;
     private paused = false;
     private fast_mode = false;
@@ -91,7 +91,7 @@ export class SmartEaters {
             let closest_eater_idx = 0, closest_eater_dist = Infinity;
 
             for (let i = 0; i < this.population.length; i++) {
-                const dist_sq = this.population[i].getPosition().dist_sq(mouse_pos);
+                const dist_sq = this.population[i].position.dist_sq(mouse_pos);
                 if (dist_sq < closest_eater_dist) {
                     closest_eater_dist = dist_sq;
                     closest_eater_idx = i;
@@ -101,7 +101,7 @@ export class SmartEaters {
             if (closest_eater_dist ** 0.5 < this.params.eater_size * 2 * DPR) {
                 this.setSelected(closest_eater_idx);
             } else {
-                this.selected_idx = undefined;
+                this.selected_idx = -1;
             }
         });
 
@@ -126,7 +126,7 @@ export class SmartEaters {
         let closest_idx = 0, closest_dist_sq = Infinity;
 
         for (let i = 0; i < this.food.length; i++) {
-            const dist = eater.getPosition().dist_sq(this.food[i]);
+            const dist = eater.position.dist_sq(this.food[i]);
             if (dist < closest_dist_sq) {
                 closest_dist_sq = dist;
                 closest_idx = i;
@@ -149,7 +149,7 @@ export class SmartEaters {
         }
 
         //Update positions
-        for (let eater of this.population) {
+        for (const eater of this.population) {
 
             const chromo = this.genetics.getPopulation()[eater.getChromosomeIdx()];
             this.brain.putWeights(this.layer_sizes, chromo.getBits());
@@ -158,7 +158,7 @@ export class SmartEaters {
             eater.closest_food = Vector2D.clone(this.food[closest_food.index]);
 
             //food dir
-            const [food_l, food_r] = this.food[closest_food.index].sub(eater.getPosition()).normalize().toArray();
+            const [food_l, food_r] = this.food[closest_food.index].sub(eater.position).normalize().toArray();
 
             if (closest_food.dist < (this.params.eater_size + this.params.food_size) / 2) { //snack time!
                 const f = chromo.getFitness() || 1;
@@ -169,8 +169,8 @@ export class SmartEaters {
             //lookat
 
             const lookat = [
-                Math.cos(eater.getAngle()),
-                Math.sin(eater.getAngle())
+                Math.cos(eater.angle),
+                Math.sin(eater.angle)
             ];
 
             const [turn_left, turn_right] = this.brain.run(...lookat, food_l, food_r);
@@ -181,14 +181,14 @@ export class SmartEaters {
                 this.params.max_turn_rate
             );
 
-            eater.setAngle(eater.getAngle() + rot_force);
+            eater.angle += rot_force;
 
             eater.lookat = new Vector2D(lookat[0], lookat[1]);
             eater.food_dir = new Vector2D(food_l, food_r);
 
-            eater.getPosition().plus(eater.lookat.times(this.params.max_speed * DPR));
+            eater.position.plus(eater.lookat.times(this.params.max_speed * DPR));
 
-            let pos = eater.getPosition();
+            const pos = eater.position;
 
             if (this.params.wrap_borders) {
                 if (pos.x > this.cnv.width) pos.x = 0;
@@ -224,10 +224,10 @@ export class SmartEaters {
         this.spawnFood();
 
         for (let eater of this.population) {
-            eater.setPosition(this.randomPos());
+            eater.position = this.randomPos();
         }
 
-        this.selected_idx = undefined;
+        this.selected_idx = -1;
     }
 
     public run() {
@@ -253,40 +253,71 @@ export class SmartEaters {
 
         this.ctx.clearRect(0, 0, this.cnv.width, this.cnv.height);
 
-        //draw food
-        this.ctx.fillStyle = 'rgb(52, 73, 94)';
-        const fs = this.params.food_size;
-        for (let f of this.food) {
-            this.ctx.beginPath();
-            this.ctx.fillRect((f.x - fs / 2) / DPR, (f.y - fs / 2) / DPR, fs, fs);
-            this.ctx.fill();
+        this.drawFood();
+        this.drawEaters();
+        this.highlightSelectedEater();
+        this.drawGenerationInfo();
+    }
+
+    private drawGenerationInfo(): void {
+        const best = this.genetics.getFittest().getFitness() !== 0 ?
+            Math.log2(this.genetics.getFittest().getFitness()) : 0;
+
+        this.ctx.fillStyle = 'black';
+        this.ctx.fillText(`Generation: ${this.genetics.getGeneration()}`, 5, 10);
+        this.ctx.fillText(`avg: ${Math.log2(1 + this.genetics.getAverageFitness()).toFixed(3)}`, 5, 25);
+        this.ctx.fillText(`best: ${best}`, 5, 40);
+        this.ctx.fillText(`ticks: ${this.ticks} / ${this.params.ticks_per_gen}`, 5, 55);
+    }
+
+    private highlightSelectedEater(): void {
+        if (this.follow_fittest) {
+            this.selected_idx = this.genetics.getStats().fittest_idx;
         }
 
-        // draw Eaters
+        if (this.selected_idx !== -1 && !this.hide_non_selected) {
+            this.ctx.lineWidth = 2;
+            this.ctx.strokeStyle = 'red';
+            this.ctx.beginPath();
+            const eater = this.population[this.selected_idx];
+            const pos = eater.position;
+            this.ctx.arc(pos.x / DPR, pos.y / DPR, this.params.eater_size * 2, 0, MathUtils.TWO_PI);
+            this.ctx.stroke();
+            this.ctx.closePath();
+            this.ctx.beginPath();
+            this.ctx.lineWidth = 1;
+            this.ctx.strokeStyle = 'black';
+            this.ctx.moveTo(pos.x / DPR, pos.y / DPR);
+            const food_dir = pos.add(eater.food_dir.times(this.params.eater_size * 2 * DPR));
+            this.ctx.lineTo(food_dir.x / DPR, food_dir.y / DPR);
+            this.ctx.stroke();
+        }
+    }
+
+    private drawEaters(): void {
 
         const c1 = [46, 204, 113];
         const c2 = [255, 0, 0];
         const max = Math.log2(this.genetics.getFittest().getFitness());
         let i = 0;
 
-
-        for (let eater of this.population) {
+        for (const eater of this.population) {
 
             if (this.show_lines) {
                 this.ctx.beginPath();
                 this.ctx.lineWidth = 1;
                 this.ctx.strokeStyle = 'black';
-                this.ctx.moveTo(eater.getPosition().x / DPR, eater.getPosition().y / DPR);
-                const food = eater.getPosition().add(eater.food_dir.times(eater.getPosition().dist(eater.closest_food)));
+                this.ctx.moveTo(eater.position.x / DPR, eater.position.y / DPR);
+                const food = eater.position.add(eater.food_dir.times(eater.position.dist(eater.closest_food)));
                 this.ctx.lineTo(food.x / DPR, food.y / DPR);
                 this.ctx.stroke();
             }
 
-            if (this.hide_non_selected && this.selected_idx && i++ !== this.selected_idx) continue;
+            if (this.hide_non_selected && this.selected_idx !== undefined && i++ !== this.selected_idx) continue;
 
             const fitness = Math.log2(this.genetics.getPopulation()[eater.getChromosomeIdx()].getFitness());
 
-            let c = [
+            const c = [
                 MathUtils.clamp(MathUtils.map(fitness, 0, max, c1[0], c2[0]), Math.min(c1[0], c2[0]), Math.max(c1[0], c2[0])),
                 MathUtils.clamp(MathUtils.map(fitness, 0, max, c1[1], c2[1]), Math.min(c1[1], c2[1]), Math.max(c1[1], c2[1])),
                 MathUtils.clamp(MathUtils.map(fitness, 0, max, c1[2], c2[2]), Math.min(c1[2], c2[2]), Math.max(c1[2], c2[2]))
@@ -300,55 +331,30 @@ export class SmartEaters {
             )`;
 
             this.ctx.beginPath();
-            let la = eater.lookat.times(this.params.eater_size * DPR).add(eater.getPosition());
-            let a = la.sub(eater.getPosition()).angle();
+            let la = eater.lookat.times(this.params.eater_size * DPR).add(eater.position);
+            let a = la.sub(eater.position).angle();
             let b = Math.PI / 1.3;
             let u = new Vector2D(Math.cos(a + b), Math.sin(a + b));
             let v = new Vector2D(Math.cos(a - b), Math.sin(a - b));
-            let p1 = eater.getPosition().add(u.times(this.params.eater_size * DPR));
-            let p2 = eater.getPosition().add(v.times(this.params.eater_size * DPR));
+            let p1 = eater.position.add(u.times(this.params.eater_size * DPR));
+            let p2 = eater.position.add(v.times(this.params.eater_size * DPR));
             this.ctx.moveTo(p1.x / DPR, p1.y / DPR);
             this.ctx.lineTo(la.x / DPR, la.y / DPR);
             this.ctx.lineTo(p2.x / DPR, p2.y / DPR);
             this.ctx.fill();
 
         }
+    }
 
-        //highlight the selected eater:
-
-        if (this.follow_fittest) {
-            const max_fitness = this.genetics.getFittest().getFitness();
-            this.selected_idx = this.genetics.getPopulation().findIndex(e => e.getFitness() === max_fitness);
-            // .indexOf(this.genetics.getFittest());
-        }
-
-        if (this.selected_idx && !this.hide_non_selected) {
-            this.ctx.lineWidth = 2;
-            this.ctx.strokeStyle = 'red';
+    private drawFood(): void {
+        //draw food
+        this.ctx.fillStyle = 'rgb(52, 73, 94)';
+        const fs = this.params.food_size;
+        for (let f of this.food) {
             this.ctx.beginPath();
-            const eater = this.population[this.selected_idx];
-            const pos = eater.getPosition();
-            this.ctx.arc(pos.x / DPR, pos.y / DPR, this.params.eater_size * 2, 0, MathUtils.TWO_PI);
-            this.ctx.stroke();
-            this.ctx.closePath();
-            this.ctx.beginPath();
-            this.ctx.lineWidth = 1;
-            this.ctx.strokeStyle = 'black';
-            this.ctx.moveTo(pos.x / DPR, pos.y / DPR);
-            const food_dir = pos.add(eater.food_dir.times(this.params.eater_size * 2 * DPR));
-            this.ctx.lineTo(food_dir.x / DPR, food_dir.y / DPR);
-            this.ctx.stroke();
+            this.ctx.fillRect((f.x - fs / 2) / DPR, (f.y - fs / 2) / DPR, fs, fs);
+            this.ctx.fill();
         }
-
-        const best = this.genetics.getFittest().getFitness() !== 0 ?
-            Math.log2(this.genetics.getFittest().getFitness()) : 0;
-
-        this.ctx.fillStyle = 'black';
-        this.ctx.fillText(`Generation: ${this.genetics.getGeneration()}`, 5, 10);
-        this.ctx.fillText(`avg: ${Math.log2(1 + this.genetics.getAverageFitness()).toFixed(3)}`, 5, 25);
-        this.ctx.fillText(`best: ${best}`, 5, 40);
-        this.ctx.fillText(`ticks: ${this.ticks} / ${this.params.ticks_per_gen}`, 5, 55);
-
     }
 
     public setSelected(index: number): void {

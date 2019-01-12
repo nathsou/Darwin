@@ -106,8 +106,8 @@ const smartEatersDemo = {
         new HtmlWebpackPlugin({
             title: 'SmartEaters'
         })
-    ]
-    // devtool: 'inline-source-map'
+    ],
+    devtool: 'inline-source-map'
 };
 
 const smartEatersAnalysis = {

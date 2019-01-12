@@ -14,6 +14,7 @@ export interface DarwinParams<T> {
 }
 export interface DarwinStats<T> {
     fittest: Chromosome<T>;
+    fittest_idx: number;
     avg_fitness: number;
     sum_fitness: number;
     needs_update: boolean;

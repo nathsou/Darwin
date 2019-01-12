@@ -6,13 +6,13 @@ export class Eater {
     public closest_food: Vector2D;
     public food_dir: Vector2D;
     public lookat: Vector2D;
-    private pos: Vector2D;
-    private angle: number;
+    private _pos: Vector2D;
+    private _angle: number;
     private chromosomeIdx: number;
 
     constructor(pos: Vector2D, angle: number, chromosomeIdx: number) {
-        this.pos = pos;
-        this.angle = angle;
+        this._pos = pos;
+        this._angle = angle;
         this.chromosomeIdx = chromosomeIdx;
     }
 
@@ -20,19 +20,19 @@ export class Eater {
         return this.chromosomeIdx;
     }
 
-    getPosition(): Vector2D {
-        return this.pos;
+    get position(): Vector2D {
+        return this._pos;
     }
 
-    setPosition(new_pos: Vector2D): void {
-        this.pos = new_pos;
+    set position(new_pos: Vector2D) {
+        this._pos = new_pos;
     }
 
-    getAngle(): number {
-        return this.angle;
+    get angle(): number {
+        return this._angle;
     }
 
-    setAngle(angle: number): void {
-        this.angle = angle % MathUtils.TWO_PI;
+    set angle(angle: number) {
+        this._angle = angle % MathUtils.TWO_PI;
     }
 }

@@ -3,11 +3,8 @@ import { NeuralNetFunction } from "./NeuralNet";
 export declare class EaterAnalysis {
     private cnv;
     private ctx;
-    private eater_pos;
     private food_pos;
-    private food_dir;
-    private lookat;
-    private eater_angle;
+    private eater;
     private params;
     private brain;
     private paused;

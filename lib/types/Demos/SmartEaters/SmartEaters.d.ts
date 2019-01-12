@@ -46,6 +46,10 @@ export declare class SmartEaters {
     private nextGeneration;
     run(): void;
     private render;
+    private drawGenerationInfo;
+    private highlightSelectedEater;
+    private drawEaters;
+    private drawFood;
     setSelected(index: number): void;
     getSelected(): Eater;
     getEater(idx: number): Eater;
