@@ -1,9 +1,10 @@
-export function shuffle<T>(a: T[]): T[] {
+export function shuffle<T>(array: T[]): T[] {
+    const arr = [...array];
 
-    for (let i = a.length; i !== 0; i--) {
-        const j = Math.floor(Math.random() * i);
-        [a[i - 1], a[j]] = [a[j], a[i - 1]];
+    for (let i = arr.length - 1; i > 0; i--) {
+        const swap_idx = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[swap_idx]] = [arr[swap_idx], arr[i]];
     }
 
-    return a;
+    return arr;
 }

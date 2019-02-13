@@ -1,52 +1,58 @@
 import { Chromosome } from "./Chromosome";
 
-// Sort the k largest elements
-export function partialQuickSort<T>(array: Chromosome<T>[], k: number): Chromosome<T>[] {
-    partial_quicksort(array, 0, array.length - 1, k);
-    return array;
+export function selectKBest<T>(array: Chromosome<T>[], k: number): Chromosome<T>[] {
+    // return array.sort((a, b) => b.getFitness() - a.getFitness()).slice(0, k);
+
+    reverse_partial_quicksort(array, k);
+    return array.slice(0, k);
+}
+function _quicksort<T>(arr: Chromosome<T>[], from = 0, to = arr.length - 1) {
+
+    const pivot = arr[Math.floor((from + to) / 2)].getFitness();
+
+    if (from < to) {
+        const p = partition(arr, from, to, pivot);
+
+        _quicksort(arr, from, p - 1);
+        _quicksort(arr, p, to);
+    }
 }
 
-function partial_quicksort<T>(array: Chromosome<T>[], left: number, right: number, k: number): void {
-    const pivot = Math.floor((left + right) / 2);
+function reverse_partial_quicksort<T>(arr: Chromosome<T>[], k: number, from = 0, to = arr.length - 1) {
 
-    if (left < right) {
-        const p = partition(array, pivot, left, right);
+    const pivot = arr[Math.floor((from + to) / 2)].getFitness();
 
-        partial_quicksort(array, left, p - 1, k);
+    if (from < to) {
+        const p = partition(arr, from, to, pivot);
 
+        _quicksort(arr, from, p - 1);
         if (p < k) {
-            partial_quicksort(array, p, right, k);
+            _quicksort(arr, p, to);
         }
     }
 }
 
-function partition<T>(array: Chromosome<T>[], pivot: number, left: number, right: number): number {
+function partition<T>(array: Chromosome<T>[], left: number, right: number, pivot: number): number {
 
-    const pivot_value = array[pivot].getFitness();
+    // put every element smaller than the pivot to its left
+    // and every element biffer to its right
+    // returning the pivot's position
 
     while (left <= right) {
-        while (array[left].getFitness() > pivot_value) {
+        while (array[left].getFitness() > pivot) {
             left++;
         }
 
-        while (array[right].getFitness() < pivot_value) {
+        while (array[right].getFitness() < pivot) {
             right--;
         }
 
         if (left <= right) {
-            swap(array, left, right);
+            [array[left], array[right]] = [array[right], array[left]];
             left++;
             right--;
         }
     }
 
     return left;
-}
-
-function swap(array: any[], a: number, b: number): void {
-    if (a === b) return;
-
-    const tmp = array[a];
-    array[a] = array[b];
-    array[b] = tmp;
 }

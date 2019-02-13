@@ -1,7 +1,7 @@
 import { Chromosome } from "./Chromosome";
 import { CrossoverMethod, CustomCrossoverMethod } from "./CrossoverMethods";
 import { CustomMutationMethod, MutationMethod } from "./MutationMethod";
-import { partialQuickSort } from "./Utils";
+import { selectKBest } from "./Utils";
 
 export interface DarwinParams<T> {
     population_size: number,
@@ -109,7 +109,7 @@ export class Darwin<T> {
 
     public updateFitness(fitness_evaluator: FitnessEvaluator<T>): void {
         for (const chromo of this.population) {
-            chromo.setFitness(fitness_evaluator(chromo.getBits()));
+            chromo.setFitness(fitness_evaluator(chromo.getGenes()));
         }
 
         this.stats.needs_update = true;
@@ -169,7 +169,7 @@ export class Darwin<T> {
 
     public getTopChromosomes(count: number): Chromosome<T>[] {
         // return this.population.sort((a, b) => b.getFitness() - a.getFitness()).slice(0, count);
-        return partialQuickSort(this.population, count).slice(0, count);
+        return selectKBest(this.population, count);
     }
 
     public getAverageFitness(): Readonly<number> {

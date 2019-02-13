@@ -46,7 +46,7 @@ export class MonkeyFactory {
 
             // update the fitness
             for (const bob of genetics.getPopulation()) {
-                const p = bob.getBits().join('');
+                const p = bob.getGenes().join('');
                 const d = string_dist(p, target);
 
                 bob.setFitness(2 ** (target.length - d));

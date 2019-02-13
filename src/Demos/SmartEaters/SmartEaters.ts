@@ -152,7 +152,7 @@ export class SmartEaters {
         for (const eater of this.population) {
 
             const chromo = this.genetics.getPopulation()[eater.getChromosomeIdx()];
-            this.brain.putWeights(this.layer_sizes, chromo.getBits());
+            this.brain.putWeights(this.layer_sizes, chromo.getGenes());
 
             const closest_food = this.getClosestFood(eater);
             eater.closest_food = Vector2D.clone(this.food[closest_food.index]);
@@ -236,9 +236,11 @@ export class SmartEaters {
             this.tick();
             this.render();
 
-            if (!this.fast_mode)
+            if (!this.fast_mode) {
                 requestAnimationFrame(update);
-            else setTimeout(update, 0);
+            } else {
+                setTimeout(update, 0);
+            }
         };
 
         update();
@@ -371,7 +373,7 @@ export class SmartEaters {
     }
 
     public getEaterBrain(idx: number) {
-        return NeuralNet.fromWeights(this.layer_sizes, this.genetics.getChromosome(this.population[idx].getChromosomeIdx()).getBits()).toFunction();
+        return NeuralNet.fromWeights(this.layer_sizes, this.genetics.getChromosome(this.population[idx].getChromosomeIdx()).getGenes()).toFunction();
     }
 
     public toggleFastMode(): void {
@@ -383,7 +385,7 @@ export class SmartEaters {
     }
 
     public getFittestBrain(): NeuralNetFunction {
-        return NeuralNet.fromWeights(this.layer_sizes, this.genetics.getFittest().getBits()).toFunction();
+        return NeuralNet.fromWeights(this.layer_sizes, this.genetics.getFittest().getGenes()).toFunction();
     }
 
     public toggleMating(): void {

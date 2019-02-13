@@ -24,7 +24,7 @@ export declare class Chromosome<T> extends EventEmitter {
     private crossover_ordered;
     crossover(bob: Chromosome<T>, method: CrossoverMethod | CustomCrossoverMethod<T>): Offspring<T>;
     setBits(bits: T[]): void;
-    getBits(): Readonly<T[]>;
+    getGenes(): Readonly<T[]>;
     copy(bob: Chromosome<T>): void;
     clone(): Chromosome<T>;
 }

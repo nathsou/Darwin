@@ -28,9 +28,9 @@ export class TSP_Optimizer {
             population_size: 500,
             chromosome_length: this.CITY_COUNT,
             rand_func: (() => {
-                if (this.shuffled.length === 0)
-                    this.shuffled = shuffle(this.model.slice());
-
+                if (this.shuffled.length === 0) {
+                    this.shuffled = shuffle(this.model);
+                }
                 return this.shuffled.pop();
             }).bind(this),
             crossover_method: CrossoverMethod.ORDERED,
@@ -42,7 +42,7 @@ export class TSP_Optimizer {
             rect_h = cities.reduce((a: number, b: Point) => a > b.y ? a : b.y, 0);
 
         this.fitness_k *= avg_dist_rect(rect_w, rect_h) * this.CITY_COUNT;
-        this.best_path = this.genetics.getFittest().getBits();
+        this.best_path = this.genetics.getFittest().getGenes();
     }
 
     private pathFitness(path: number[]): number {
@@ -66,12 +66,12 @@ export class TSP_Optimizer {
             this.newGen();
             const fittest = this.genetics.getFittest();
 
-            const dist = this.tsp.distance_squared(fittest.getBits()) // this.distanceFromFitness(fittest.getFitness());
+            const dist = this.tsp.distance_squared(fittest.getGenes()) // this.distanceFromFitness(fittest.getFitness());
             if (dist >= min_dist) {
                 count++;
             } else {
                 min_dist = dist;
-                this.best_path = [...fittest.getBits()];
+                this.best_path = [...fittest.getGenes()];
                 count = 0;
             }
 

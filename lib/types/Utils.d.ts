@@ -1,2 +1,2 @@
 import { Chromosome } from "./Chromosome";
-export declare function partialQuickSort<T>(array: Chromosome<T>[], k: number): Chromosome<T>[];
+export declare function selectKBest<T>(array: Chromosome<T>[], k: number): Chromosome<T>[];

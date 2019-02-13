@@ -19,8 +19,17 @@ export class TSP {
 
     private dist2D_squared(cityA: number, cityB: number): number {
 
-        const c = [cityA, cityB].sort();
-        const key = `${c[0]}-${c[1]}`;
+        let city1, city2;
+
+        if (cityB > cityA) {
+            city1 = cityA;
+            city2 = cityB;
+        } else {
+            city1 = cityB;
+            city2 = cityA;
+        }
+
+        const key = `${city1}->${city2}`;
 
         if (this.dist_map.has(key)) {
             return this.dist_map.get(key);

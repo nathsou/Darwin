@@ -86,7 +86,7 @@ export class Chromosome<T> extends EventEmitter {
                     break;
             }
         } else {
-            this.setBits((method as CustomMutationMethod<T>)(this.getBits()));
+            this.setBits((method as CustomMutationMethod<T>)(this.getGenes()));
         }
     }
 
@@ -237,7 +237,7 @@ export class Chromosome<T> extends EventEmitter {
         this.bits = [...bits];
     }
 
-    public getBits(): Readonly<T[]> {
+    public getGenes(): Readonly<T[]> {
         return this.bits;
     }
 

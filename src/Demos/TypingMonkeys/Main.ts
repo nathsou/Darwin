@@ -140,12 +140,12 @@ search_btn.addEventListener('click', () => {
     const update = () => {
         const data = iterator.next();
 
-        fittest.textContent = data.value.fittest.getBits().join('');
+        fittest.textContent = data.value.fittest.getGenes().join('');
 
         const max_fitness = Math.log2(data.value.fittest.getFitness()) / target.length;
         const avg_fitness = Math.log2(data.value.avg_fitness) / target.length;
 
-        console.log(data.value);
+        // console.log(data.value);
 
         stats_div.innerHTML =
             `generation: ${data.value.generation}</br>

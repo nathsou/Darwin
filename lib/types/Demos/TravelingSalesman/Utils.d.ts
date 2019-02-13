@@ -1,1 +1,1 @@
-export declare function shuffle<T>(a: T[]): T[];
+export declare function shuffle<T>(array: T[]): T[];
