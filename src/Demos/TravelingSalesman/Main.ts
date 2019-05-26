@@ -1,4 +1,4 @@
-import { TSP_Optimizer } from "./TSP_Optimizer";
+import { TSPOptimizer } from "./TSPOptimizer";
 
 const cnv = document.createElement('canvas');
 const ctx = cnv.getContext('2d');
@@ -26,7 +26,7 @@ for (let i = 0; i < 40; i++) {
     });
 }
 
-const tsp_opt = new TSP_Optimizer(cities);
+const tsp_opt = new TSPOptimizer(cities);
 
 const optimizer = tsp_opt.optimize();
 

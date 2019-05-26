@@ -6,7 +6,7 @@ import { selectKBest } from "./Utils";
 export interface DarwinParams<T> {
     population_size: number,
     chromosome_length: number,
-    rand_func: () => T,
+    rand_gene: () => T,
     crossover_rate?: number,
     mutation_rate?: number,
     crossover_method?: CrossoverMethod | CustomCrossoverMethod<T>,
@@ -23,31 +23,31 @@ export interface DarwinStats<T> {
     needs_update: boolean
 }
 
-export type FitnessEvaluator<T> = (chromo: T[]) => number;
+export type FitnessEvaluator<T> = (chromo: Readonly<T>[]) => number;
 
 export class Darwin<T> {
 
     private population: Chromosome<T>[] = [];
     private stats: DarwinStats<T>;
     private generation = 0;
-    private params: DarwinParams<T>;
+    private params: Required<DarwinParams<T>>;
 
     constructor(params: DarwinParams<T>) {
 
         const on_fitness_update = () => { this.stats.needs_update = true; };
 
         for (let i = 0; i < params.population_size; i++) {
-            const chromo = new Chromosome<T>(params.chromosome_length, params.rand_func);
+            const chromo = new Chromosome<T>(params.chromosome_length, params.rand_gene);
             chromo.on('update_fitness', on_fitness_update);
             this.population.push(chromo);
         }
 
         this.params = {
             crossover_rate: 0.7,
-            mutation_rate: 1 / params.chromosome_length,
+            mutation_rate: 1 / params.population_size,
             crossover_method: CrossoverMethod.SINGLE_POINT,
             mutation_method: MutationMethod.FLIP,
-            elite_count: 1, // Math.floor(this.params.population_size / 25);
+            elite_count: Math.ceil(params.population_size / 25),
             elite_copies: 1,
             ...params
         };
@@ -62,34 +62,40 @@ export class Darwin<T> {
 
     }
 
-    public duplicateElite(new_pop: Chromosome<T>[]): void {
+    private duplicateElite(new_pop: Chromosome<T>[]): void {
         // ELITISM i.e. keeping the fittest Chromosomes
-        if (this.params.elite_count > 0) {
-            const elite = this.getTopChromosomes(this.params.elite_count);
+
+        const { elite_count, elite_copies } = this.params;
+
+        if (elite_count > 0) {
+            const elite = this.getTopChromosomes(elite_count);
             // Keep the fittest Chromosomes
             new_pop.push(...elite);
 
             // Duplicate the elite
-            for (let i = 0; i < this.params.elite_count; i++) {
-                for (let j = 0; j < this.params.elite_copies; j++) {
+            for (let i = 0; i < elite_count; i++) {
+                for (let j = 0; j < elite_copies; j++) {
                     new_pop.push(elite[i].clone());
                 }
             }
         }
     }
 
-    public crossover(new_pop: Chromosome<T>[]): void {
-        while (new_pop.length < this.params.population_size) {
-            if (Math.random() < this.params.crossover_rate) {
+    private crossover(new_pop: Chromosome<T>[]): void {
+
+        const { population_size, crossover_rate, crossover_method, rand_gene } = this.params;
+
+        while (new_pop.length < population_size) {
+            if (Math.random() < crossover_rate) {
                 const mum = this.getRandomChromosome();
                 const dad = this.getRandomChromosome();
 
-                const babies = mum.crossover(dad, this.params.crossover_method);
+                const { baby1, baby2 } = mum.crossover(dad, crossover_method);
 
-                const baby1 = new Chromosome<T>(babies.baby1, this.params.rand_func);
-                const baby2 = new Chromosome<T>(babies.baby2, this.params.rand_func);
-
-                new_pop.push(baby1, baby2);
+                new_pop.push(
+                    new Chromosome<T>(baby1, rand_gene),
+                    new Chromosome<T>(baby2, rand_gene)
+                );
             }
         }
 
@@ -100,7 +106,7 @@ export class Darwin<T> {
         }
     }
 
-    public mutate(new_pop: Chromosome<T>[]): void {
+    private mutate(new_pop: Chromosome<T>[]): void {
         for (const c of new_pop) {
             c.mutate(this.params.mutation_rate, this.params.mutation_method);
             // c.setFitness(0); // reset fitness
@@ -163,7 +169,7 @@ export class Darwin<T> {
             }
         }
 
-        // this should never happend
+        // this should never happen
         return this.population[0];
     }
 
@@ -173,19 +179,12 @@ export class Darwin<T> {
     }
 
     public getAverageFitness(): Readonly<number> {
-        if (this.stats.needs_update) {
-            this.updateStats();
-        }
-
+        this.updateStats();
         return this.stats.avg_fitness;
     }
 
     public getFittest(): Chromosome<T> {
-
-        if (this.stats.needs_update) {
-            this.updateStats();
-        }
-
+        this.updateStats();
         return this.stats.fittest;
     }
 

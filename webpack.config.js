@@ -25,8 +25,8 @@ const darwinUMD = {
         library: 'darwin',
         libraryTarget: 'umd',
         globalObject: "(typeof window !== 'undefined' ? window : this)"
-    },
-    devtool: 'source-map'
+    }
+    // devtool: 'source-map'
 };
 
 const typingMonkeysDemo = {
@@ -79,8 +79,8 @@ const tspDemo = {
         new HtmlWebpackPlugin({
             title: 'Traveling Salesman'
         })
-    ],
-    devtool: 'inline-source-map'
+    ]
+    // devtool: 'inline-source-map'
 };
 
 const smartEatersDemo = {

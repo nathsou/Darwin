@@ -33,7 +33,7 @@ export class MonkeyFactory {
 
     constructor(params: DarwinParams<string>) {
         this.params = params;
-        this.params.rand_func = rand_char;
+        this.params.rand_gene = rand_char;
     }
 
     public *search(target: string): IterableIterator<GenerationInfo> {

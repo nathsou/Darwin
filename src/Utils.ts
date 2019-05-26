@@ -35,7 +35,7 @@ function reverse_partial_quicksort<T>(arr: Chromosome<T>[], k: number, from = 0,
 function partition<T>(array: Chromosome<T>[], left: number, right: number, pivot: number): number {
 
     // put every element smaller than the pivot to its left
-    // and every element biffer to its right
+    // and every element bigger to its right
     // returning the pivot's position
 
     while (left <= right) {

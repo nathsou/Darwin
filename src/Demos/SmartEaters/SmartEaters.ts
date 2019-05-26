@@ -76,7 +76,7 @@ export class SmartEaters {
 
         this.genetics = new Darwin<number>({
             population_size: this.params.population_size,
-            rand_func: () => (Math.random() * 2) - 1,
+            rand_gene: () => (Math.random() * 2) - 1,
             chromosome_length: NeuralNet.weightsCount(this.layer_sizes)
         });
 

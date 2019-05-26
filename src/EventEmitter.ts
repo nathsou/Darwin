@@ -1,36 +1,42 @@
-export type EventHandler = (value: any) => any;
+export type EventHandler = (e: any) => void;
 
-export abstract class EventEmitter {
+export default abstract class EventEmitter<EventName = string> {
 
-    private handlers: Map<string, EventHandler[]>;
+    private event_handlers: Map<EventName, EventHandler[]>;
 
     constructor() {
-        // This Map is often unused, it is therfore best to initialize it only when needed
-        // i.e  when the on() method is called for the first time
-        // this.handlers = new Map<string, EventHandler[]>();
+        this.event_handlers = new Map<EventName, EventHandler[]>();
     }
 
-    on(ev: string, handler: EventHandler) {
-        if (this.handlers === undefined) {
-            this.handlers = new Map<string, EventHandler[]>();
+    public on(ev: EventName, handler: EventHandler): void {
+        if (!this.isListening(ev)) {
+            this.event_handlers.set(ev, []);
         }
 
-        if (this.handlers.has(ev)) {
-            this.handlers.get(ev).push(handler);
-        } else {
-            this.handlers.set(ev, [handler]);
-        }
+        this.event_handlers.get(ev).push(handler);
     }
 
-    protected emit(ev: string, value?: any) {
-        if (this.handlers !== undefined && this.handlers.has(ev)) {
-            for (const handler of this.handlers.get(ev)) {
-                handler.call(this, value);
+    protected isListening(ev: EventName): boolean {
+        return this.event_handlers.has(ev);
+    }
+
+    protected emit(ev: EventName, value?: any, thisArg?: any): void {
+        if (this.isListening(ev)) {
+            for (const handler of this.event_handlers.get(ev)) {
+                handler.call(thisArg, value);
             }
         }
     }
 
-    protected bindEvent(em: EventEmitter, ev: string) {
+    protected bindEvent(em: EventEmitter<EventName>, ev: EventName): void {
         em.on(ev, value => this.emit(ev, value));
+    }
+
+    public removeListener(ev: EventName): void {
+        this.event_handlers.delete(ev);
+    }
+
+    public removeListeners(): void {
+        this.event_handlers.clear();
     }
 }

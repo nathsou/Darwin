@@ -128,7 +128,7 @@ search_btn.addEventListener('click', () => {
     const factory = new MonkeyFactory({
         population_size: parseInt((population as HTMLInputElement).value),
         chromosome_length: target.length,
-        rand_func: rand_char,
+        rand_gene: rand_char,
         crossover_rate: parseFloat((crossover as HTMLInputElement).value),
         mutation_rate: parseFloat((mutation as HTMLInputElement).value),
         elite_count: parseInt((elite_count as HTMLInputElement).value),

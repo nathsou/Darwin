@@ -1,16 +1,17 @@
-import { MutationMethod, CustomMutationMethod } from "./MutationMethod";
 import { CrossoverMethod, CustomCrossoverMethod } from "./CrossoverMethods";
-import { EventEmitter } from "./EventEmitter";
+import EventEmitter from "./EventEmitter";
+import { CustomMutationMethod, MutationMethod } from "./MutationMethod";
 export interface Offspring<T> {
     baby1: T[];
     baby2: T[];
 }
-export declare class Chromosome<T> extends EventEmitter {
+export declare class Chromosome<T> extends EventEmitter<'update_fitness'> {
     private length;
-    private bits;
+    private genes;
     private fitness;
-    private rand_func;
-    constructor(length_or_bits: number | T[], rand_func: () => T);
+    private rand_gene;
+    constructor(length: number, rand_gene: () => T);
+    constructor(genes: T[], rand_gene: () => T);
     getFitness(): number;
     setFitness(f: number): void;
     compare(bob: Chromosome<T>): number;
@@ -23,8 +24,8 @@ export declare class Chromosome<T> extends EventEmitter {
     private crossover_half_uniform;
     private crossover_ordered;
     crossover(bob: Chromosome<T>, method: CrossoverMethod | CustomCrossoverMethod<T>): Offspring<T>;
-    setBits(bits: T[]): void;
-    getGenes(): Readonly<T[]>;
+    setGenes(genes: T[]): void;
+    getGenes(): Readonly<T>[];
     copy(bob: Chromosome<T>): void;
     clone(): Chromosome<T>;
 }

@@ -4,14 +4,14 @@ import { Point, TSP } from "./TSP";
 import { CrossoverMethod } from "../../CrossoverMethods";
 import { shuffle } from "./Utils";
 
-export class TSP_Optimizer {
+export class TSPOptimizer {
 
     private CITY_COUNT: number;
     private genetics: Darwin<number>;
     private tsp: TSP;
     private shuffled: number[] = [];
     private model: number[] = [];
-    private convergence_treshold = 30;
+    private convergence_threshold = 30;
     private max_generation = 5000;
     private fitness_k = 15;
     private best_path: number[];
@@ -27,7 +27,7 @@ export class TSP_Optimizer {
         this.genetics = new Darwin<number>({
             population_size: 500,
             chromosome_length: this.CITY_COUNT,
-            rand_func: (() => {
+            rand_gene: (() => {
                 if (this.shuffled.length === 0) {
                     this.shuffled = shuffle(this.model);
                 }
@@ -62,7 +62,7 @@ export class TSP_Optimizer {
 
         let min_dist = Infinity, count = 0;
 
-        while (this.genetics.getGeneration() !== this.max_generation && count !== this.convergence_treshold) {
+        while (this.genetics.getGeneration() !== this.max_generation && count !== this.convergence_threshold) {
             this.newGen();
             const fittest = this.genetics.getFittest();
 
