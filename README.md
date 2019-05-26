@@ -28,7 +28,7 @@ On the other hand, the 'Smart Eaters' demo evolves the weights and biases of an 
   const genetics = new Darwin<T>({
     population_size: number,
     chromosome_length: number,
-    rand_func: () => T,
+    rand_gene: () => T,
     crossover_rate?: number,
     mutation_rate?: number,
     crossover_method?: CrossoverMethod | CustomCrossoverMethod<T>,
@@ -38,7 +38,7 @@ On the other hand, the 'Smart Eaters' demo evolves the weights and biases of an 
   });
 ```
 
-The constructor of the Darwin class initializes a population of random chromosomes, we can now assign a score (or fitness) to each of those chromosomes based on their genes represented by an array of the type returned by rand_func :
+The constructor of the Darwin class initializes a population of random chromosomes, we can now assign a score (or fitness) to each of those chromosomes based on their genes represented by an array of the type returned by rand_gene :
 
 ```typescript
   for (let chromo of genetics.getPopulation()) {
