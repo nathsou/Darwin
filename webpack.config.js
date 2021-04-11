@@ -1,7 +1,7 @@
 const path = require('path');
 
 const darwinUMD = {
-    entry: './src/Darwin.ts',
+    entry: path.resolve(__dirname, '/src/Darwin.ts'),
     module: {
         rules: [{
             test: /\.ts$/,

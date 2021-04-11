@@ -3,7 +3,7 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 const dist = path.resolve(__dirname, 'dist');
 
 const typingMonkeysDemo = {
-    entry: './src/Demos/typingMonkeys/Main.ts',
+    entry: path.resolve(__dirname, 'src/Demos/typingMonkeys/Main.ts'),
     module: {
         rules: [{
             test: /\.ts$/,
@@ -29,7 +29,7 @@ const typingMonkeysDemo = {
 };
 
 const tspDemo = {
-    entry: './src/Demos/TravelingSalesman/Main.ts',
+    entry: path.resolve(__dirname, 'src/Demos/TravelingSalesman/Main.ts'),
     module: {
         rules: [{
             test: /\.ts$/,
@@ -56,7 +56,7 @@ const tspDemo = {
 };
 
 const smartEatersDemo = {
-    entry: './src/Demos/SmartEaters/Main.ts',
+    entry: path.resolve(__dirname, '/src/Demos/SmartEaters/Main.ts'),
     module: {
         rules: [{
             test: /\.ts$/,
@@ -82,7 +82,7 @@ const smartEatersDemo = {
 };
 
 const smartEatersAnalysis = {
-    entry: './src/Demos/SmartEaters/AnalysisMain.ts',
+    entry: path.resolve(__dirname, '/src/Demos/SmartEaters/AnalysisMain.ts'),
     module: {
         rules: [{
             test: /\.ts$/,
