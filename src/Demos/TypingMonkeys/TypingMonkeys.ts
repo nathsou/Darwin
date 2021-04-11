@@ -1,5 +1,5 @@
-import { Darwin, DarwinParams } from "../../Darwin";
 import { Chromosome } from "../../Chromosome";
+import { Darwin, DarwinParams } from "../../Darwin";
 
 export const alphabet = [
     'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k',

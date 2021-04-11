@@ -11,7 +11,7 @@ export const mutationMethod: { [K in MutationMethodName]: MutationFunction<any> 
 
         for (let i = 0; i < length; i++) {
             if (chromosome.randomNumber() < mutationRate) {
-                genes.push(chromosome.randomGene());
+                genes[i] = chromosome.randomGene();
             }
         }
     },
@@ -22,10 +22,8 @@ export const mutationMethod: { [K in MutationMethodName]: MutationFunction<any> 
 
         for (let i = 0; i < length; i++) {
             if (chromosome.randomNumber() < mutationRate) {
-                const j = Math.floor(chromosome.randomNumber() * length);
-                const tmp = genes[i];
-                genes[i] = genes[j];
-                genes[j] = tmp;
+                const j = Math.floor(Math.random() * length);
+                [genes[i], genes[j]] = [genes[j], genes[i]];
             }
         }
     }

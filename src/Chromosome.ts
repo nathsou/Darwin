@@ -58,7 +58,7 @@ export class Chromosome<T> extends EventEmitter<'update_fitness'> {
     }
 
     public setGenes(genes: T[]): void {
-        this.genes = genes;
+        this.genes = [...genes];
     }
 
     public getGenes(): T[] {
@@ -88,6 +88,6 @@ export class Chromosome<T> extends EventEmitter<'update_fitness'> {
     }
 
     public randomNumber(): number {
-        return this.randomNumber();
+        return this.randNum();
     }
 }
