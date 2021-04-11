@@ -53,7 +53,6 @@ export class Darwin<T> {
                 this.params.randomNumber
             );
 
-            chromo.on('update_fitness', onFitnessUpdate);
             this.population.push(chromo);
         }
 
@@ -213,7 +212,7 @@ export class Darwin<T> {
         return this.stats;
     }
 
-    public updateStats(forceUpdate = false): void {
+    public updateStats(forceUpdate = true): void {
         if (forceUpdate || this.stats.needsUpdate) {
             let totalFitness = 0;
             let maxFitness = 0;

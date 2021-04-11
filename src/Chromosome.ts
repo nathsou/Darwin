@@ -1,10 +1,9 @@
 import { CrossoverFunction } from "./CrossoverMethods";
-import EventEmitter from "./EventEmitter";
 import { MutationFunction } from "./MutationMethod";
 
 export type Offspring<T> = [baby1: T[], baby2: T[]];
 
-export class Chromosome<T> extends EventEmitter<'update_fitness'> {
+export class Chromosome<T> {
     private length: number;
     private genes: T[] = [];
     private fitness = 0;
@@ -12,8 +11,6 @@ export class Chromosome<T> extends EventEmitter<'update_fitness'> {
     private randNum: () => number;
 
     constructor(genes: T[], randomGene: () => T, randomNumber: () => number) {
-        super();
-
         this.randGene = randomGene;
         this.randNum = randomNumber;
         this.genes = genes;
@@ -35,7 +32,6 @@ export class Chromosome<T> extends EventEmitter<'update_fitness'> {
 
     public setFitness(f: number): void {
         this.fitness = f;
-        this.emit('update_fitness', f);
     }
 
     // returns the number of bits which are different = Hamming distance
