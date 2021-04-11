@@ -22,7 +22,7 @@ const eaters = new SmartEaters(cnv, {
     ticksPerGen: 2000,
     populationSize: 100,
     foodCount: 120,
-    crossoverMethod: CrossoverMethod.TWO_POINT,
+    crossoverMethod: CrossoverMethod.twoPoint,
     wrapBorders: true,
     mutationRate: 0.02,
     hiddenLayersSizes: [8]

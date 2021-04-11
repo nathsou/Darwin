@@ -1,4 +1,4 @@
-import { CrossoverMethod } from "../../CrossoverMethods";
+import { CrossoverFunction, CrossoverMethod } from "../../CrossoverMethods";
 import { Darwin } from "../../Darwin";
 import { Eater } from "./Eater";
 import { NeuralNet, NeuralNetFunction } from "./NeuralNet";
@@ -18,7 +18,7 @@ export interface EatersParams {
     maxSpeed?: number,
     maxTurnRate?: number,
     ticksPerGen?: number,
-    crossoverMethod?: CrossoverMethod,
+    crossoverMethod?: CrossoverFunction<number>,
     eaterSize?: number,
     foodSize?: number,
     wrapBorders?: boolean
@@ -63,7 +63,7 @@ export class SmartEaters {
             maxSpeed: 2,
             maxTurnRate: 0.3,
             ticksPerGen: 1000,
-            crossoverMethod: CrossoverMethod.SINGLE_POINT,
+            crossoverMethod: CrossoverMethod.singlePoint,
             eaterSize: 12,
             foodSize: 5,
             wrapBorders: true,

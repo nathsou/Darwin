@@ -32,7 +32,7 @@ export class TSPOptimizer {
                 }
                 return this.shuffled.pop();
             }).bind(this),
-            crossoverMethod: CrossoverMethod.ORDERED,
+            crossoverMethod: CrossoverMethod.ordered,
             mutationMethod: MutationMethod.SWAP,
             eliteCount: 5
         });

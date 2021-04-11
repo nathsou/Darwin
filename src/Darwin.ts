@@ -1,5 +1,5 @@
 import { Chromosome } from "./Chromosome";
-import { CrossoverMethod, CustomCrossoverMethod } from "./CrossoverMethods";
+import { CrossoverMethod, CrossoverFunction } from "./CrossoverMethods";
 import { CustomMutationMethod, MutationMethod } from "./MutationMethod";
 import { selectKBest } from "./Utils";
 
@@ -9,7 +9,7 @@ export interface DarwinParams<T> {
     randGene: () => T,
     crossoverRate?: number,
     mutationRate?: number,
-    crossoverMethod?: CrossoverMethod | CustomCrossoverMethod<T>,
+    crossoverMethod?: CrossoverFunction<T>,
     mutationMethod?: MutationMethod | CustomMutationMethod<T>,
     eliteCount?: number,
     eliteCopies?: number
@@ -43,7 +43,7 @@ export class Darwin<T> {
         this.params = {
             crossoverRate: 0.7,
             mutationRate: 1 / params.populationSize,
-            crossoverMethod: CrossoverMethod.SINGLE_POINT,
+            crossoverMethod: CrossoverMethod.singlePoint,
             mutationMethod: MutationMethod.FLIP,
             eliteCount: Math.ceil(params.populationSize / 25),
             eliteCopies: 1,
@@ -86,7 +86,7 @@ export class Darwin<T> {
                 const mum = this.getRandomChromosome();
                 const dad = this.getRandomChromosome();
 
-                const [baby1, baby2] = mum.crossover(dad, crossoverMethod);
+                const [baby1, baby2] = mum.crossoverWith(dad, crossoverMethod);
 
                 newPopulation.push(
                     new Chromosome<T>(baby1, randGene),

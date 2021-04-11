@@ -34,7 +34,7 @@ On the other hand, the 'Smart Eaters' demo evolves the weights and biases of an 
     randGene: () => T,
     crossoverRate?: number,
     mutationRate?: number,
-    crossoverMethod?: CrossoverMethod | CustomCrossoverMethod<T>,
+    crossoverMethod?: CrossoverFunction<T>,
     mutationMethod?: MutationMethod | CustomMutationMethod<T>,
     eliteCount?: number,
     eliteCopies?: number
