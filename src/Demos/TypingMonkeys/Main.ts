@@ -1,161 +1,157 @@
-import { alphabet, MonkeyFactory, rand_char } from "./TypingMonkeys";
+import { alphabet, MonkeyFactory } from "./TypingMonkeys";
 
-function elem(name: string, props: { [key: string]: string } = {}): HTMLElement {
-    const el = document.createElement(name);
+const h = <T extends keyof HTMLElementTagNameMap>(
+    name: T,
+    props: Partial<HTMLElementTagNameMap[T]> = {},
+    style: Partial<Omit<CSSStyleDeclaration, 'length' | 'parentRule'>> = {}
+): HTMLElementTagNameMap[T] => {
+    const element = document.createElement(name);
 
-    for (const prop in props) {
-        ///@ts-ignore
-        el[prop] = props[prop];
+    for (const [prop, value] of Object.entries(props)) {
+        element[prop as keyof HTMLElementTagNameMap[T]] = value;
     }
 
-    return el;
-}
+    for (const rule in style) {
+        const value = style[rule];
+        if (value !== undefined) {
+            element.style[rule] = value;
+        }
+    }
 
-function appendChildren(...chilren: ChildNode[]): void {
+    return element;
+};
+
+const appendChildren = <T extends HTMLElement>(target: T, chilren: ChildNode[]): T => {
     for (const child of chilren) {
-        document.body.appendChild(child);
+        target.appendChild(child);
     }
-}
 
-function span(text: string): HTMLSpanElement {
-    return elem('span', {
-        textContent: text
-    });
-}
+    return target;
+};
 
-function br(): HTMLBRElement {
-    return document.createElement('br');
-}
+const span = (text: string) => h('span', { textContent: text });
 
-const target_input = elem('input', {
+const br = () => h('br');
+
+const namedInput = (name: string, props: Partial<HTMLInputElement>) => {
+    const input = h('input', props);
+    const div = appendChildren(h('div'), [
+        span(name),
+        input
+    ]);
+
+    return {
+        elem: div,
+        value: () => input.value
+    };
+};
+
+const targetInput = h('input', {
     type: 'text',
-    id: 'target',
-    style: 'width: 400px;',
     value: 'https://en.wikipedia.org/wiki/Genetic_algorithm'
+}, {
+    width: '400px'
 });
 
-const search_btn = elem('button', {
-    id: 'search',
+const searchButton = h('button', {
     textContent: 'Go'
 });
 
-const fittest = elem('p', {
-    id: 'fittest',
-    style: 'font-size: 24px'
+const fittest = h('p', {}, {
+    fontSize: '24px'
 });
 
-const stats_div = elem('div', {
-    id: 'statsDiv',
-    style: 'font-size: 24px'
+const statsDiv = h('div', {}, {
+    fontSize: '24px'
 });
 
-const population = elem('input', {
+const population = namedInput('Population', {
     type: 'number',
-    id: 'population',
-    style: 'width: 70px;',
     value: '200'
 });
 
-const crossover = elem('input', {
+const crossover = namedInput('Crossover rate', {
     type: 'number',
-    id: 'crossover',
-    style: 'width: 70px;',
     value: '0.7',
     min: '0',
     max: '1',
     step: '0.01'
 });
 
-const mutation = elem('input', {
+const mutation = namedInput('Mutation rate', {
     type: 'number',
-    id: 'mutation',
-    style: 'width: 70px;',
     value: '0.02',
     min: '0',
     max: '1',
     step: '0.01'
 });
 
-const elite_count = elem('input', {
+const eliteCount = namedInput('Elite count', {
     type: 'number',
-    id: 'elite_count',
-    style: 'width: 70px;',
     value: '15'
 });
 
-const elite_copies = elem('input', {
+const eliteCopies = namedInput('Elite copies', {
     type: 'number',
-    id: 'elite_copies',
-    style: 'width: 70px;',
     value: '2'
 });
 
-appendChildren(
-    target_input,
-    search_btn,
+const paramsDiv = appendChildren(h('div', {}, {
+    width: '350px'
+}), [
+    population.elem,
+    crossover.elem,
+    mutation.elem,
+    eliteCount.elem,
+    eliteCopies.elem
+]);
+
+appendChildren(document.body, [
+    targetInput,
+    searchButton,
     br(),
     fittest,
     br(),
-    stats_div,
+    statsDiv,
     br(),
-    span('Population '),
-    population,
-    br(),
-    span('Crossover rate '),
-    crossover,
-    br(),
-    span('Mutation rate '),
-    mutation,
-    br(),
-    span('Elite count '),
-    elite_count,
-    br(),
-    span('Elite copies '),
-    elite_copies
-);
+    paramsDiv
+]);
 
-search_btn.addEventListener('click', () => {
+searchButton.addEventListener('click', () => {
+    const target = targetInput.value;
 
-    const target = (target_input as HTMLInputElement).value;
+    const invalidChar = target.split('').find(char => !alphabet.includes(char));
+    if (invalidChar) {
+        alert(`The character '${invalidChar}' cannot be used`);
+    } else {
+        const factory = new MonkeyFactory({
+            populationSize: parseInt(population.value()),
+            chromosomeLength: target.length,
+            crossoverRate: parseFloat(crossover.value()),
+            mutationRate: parseFloat(mutation.value()),
+            eliteCount: parseInt(eliteCount.value(), 10),
+            eliteCopies: parseInt(eliteCopies.value(), 10)
+        });
 
-    for (const char of target) {
-        if (alphabet.indexOf(char) === -1) {
-            alert(`The character '${char}' cannot be used`);
-            return;
-        }
+        const iterator = factory.search(target);
+
+        const update = () => {
+            const data = iterator.next();
+            fittest.textContent = data.value.fittest.getGenes().join('');
+
+            const maxFitness = Math.log2(data.value.fittest.getFitness()) / target.length;
+            const averageFitness = Math.log2(data.value.averageFitness) / target.length;
+
+            statsDiv.innerHTML =
+                `generation: ${data.value.generation}</br>
+                average fitness: ${(averageFitness * 100).toFixed(4)}% </br>
+                max fitness: ${(maxFitness * 100).toFixed(4)}% `;
+
+            if (!data.done) {
+                requestAnimationFrame(update);
+            }
+        };
+
+        update();
     }
-
-    const factory = new MonkeyFactory({
-        population_size: parseInt((population as HTMLInputElement).value),
-        chromosome_length: target.length,
-        rand_gene: rand_char,
-        crossover_rate: parseFloat((crossover as HTMLInputElement).value),
-        mutation_rate: parseFloat((mutation as HTMLInputElement).value),
-        elite_count: parseInt((elite_count as HTMLInputElement).value),
-        elite_copies: parseInt((elite_copies as HTMLInputElement).value)
-    });
-
-    const iterator = factory.search(target);
-
-    const update = () => {
-        const data = iterator.next();
-
-        fittest.textContent = data.value.fittest.getGenes().join('');
-
-        const max_fitness = Math.log2(data.value.fittest.getFitness()) / target.length;
-        const avg_fitness = Math.log2(data.value.avg_fitness) / target.length;
-
-        // console.log(data.value);
-
-        stats_div.innerHTML =
-            `generation: ${data.value.generation}</br>
-            average fitness: ${(avg_fitness * 100).toFixed(4)}% </br>
-            max fitness: ${ (max_fitness * 100).toFixed(4)}% `;
-
-        if (!data.done) {
-            requestAnimationFrame(update);
-        }
-    };
-
-    update();
 });

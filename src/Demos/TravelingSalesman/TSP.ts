@@ -1,25 +1,26 @@
+
 export interface Point {
     x: number,
     y: number
 }
 
 export class TSP {
-
     private cities: Point[];
-    private dist_map: Map<string, number>; // squared dist between a and b where a <= b
+    // squared distance between a and b where a <= b
+    private distMap: Map<string, number>;
 
     constructor(cities: Point[]) {
         this.cities = cities;
-        this.dist_map = new Map<string, number>();
+        this.distMap = new Map<string, number>();
     }
 
     private dist2D(cityA: number, cityB: number): number {
-        return this.dist2D_squared(cityA, cityB) ** 0.5;
+        return this.dist2DSquared(cityA, cityB) ** 0.5;
     }
 
-    private dist2D_squared(cityA: number, cityB: number): number {
-
-        let city1, city2;
+    private dist2DSquared(cityA: number, cityB: number): number {
+        let city1: number;
+        let city2: number;
 
         if (cityB > cityA) {
             city1 = cityA;
@@ -31,39 +32,41 @@ export class TSP {
 
         const key = `${city1}->${city2}`;
 
-        if (this.dist_map.has(key)) {
-            return this.dist_map.get(key);
+        if (this.distMap.has(key)) {
+            return this.distMap.get(key) as number;
         } else {
-            let p1 = this.cities[cityA],
-                p2 = this.cities[cityB];
+            let p1 = this.cities[cityA];
+            let p2 = this.cities[cityB];
 
-            const dist_sq = ((p1.x - p2.x) ** 2 + (p1.y - p2.y) ** 2);
+            const distSq = ((p1.x - p2.x) ** 2 + (p1.y - p2.y) ** 2);
+            this.distMap.set(key, distSq);
 
-            this.dist_map.set(key, dist_sq);
-
-            return dist_sq;
+            return distSq;
         }
     }
 
     // check that each city is visited exactly once
     public checkPathValidity(path: number[]): boolean {
-        if (path.length !== this.cities.length) return false;
+        if (path.length !== this.cities.length) {
+            return false
+        };
 
         let sorted = path.slice().sort();
 
         let prev = sorted[0];
 
         for (let i = 1; i < sorted.length; i++) {
-            if (prev === sorted[i]) return false;
+            if (prev === sorted[i]) {
+                return false;
+            }
+
             prev = sorted[i];
         }
-
 
         return true;
     }
 
     public distance(path: number[]): number {
-
         if (!this.checkPathValidity(path)) {
             throw new Error(`Invalid path: Each city must be visited exactly once.`);
         }
@@ -77,8 +80,7 @@ export class TSP {
         return dist;
     }
 
-    public distance_squared(path: number[]): number {
-
+    public distanceSquared(path: number[]): number {
         if (!this.checkPathValidity(path)) {
             throw new Error(`Invalid path: Each city must be visited exactly once.`);
         }
@@ -86,7 +88,7 @@ export class TSP {
         let dist = 0;
 
         for (let i = 1; i < path.length; i++) {
-            dist += this.dist2D_squared(path[i - 1], path[i]);
+            dist += this.dist2DSquared(path[i - 1], path[i]);
         }
 
         return dist;
@@ -101,7 +103,6 @@ export class TSP {
     }
 
     public draw(ctx: CanvasRenderingContext2D, path: number[]): void {
-
         if (path.length !== this.cities.length) {
             throw new Error(`Each city must be visited`);
         }
@@ -130,5 +131,4 @@ export class TSP {
             ctx.fill();
         }
     }
-
 }

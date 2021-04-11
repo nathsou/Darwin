@@ -1,6 +1,6 @@
 export declare type EventHandler = (e: any) => void;
 export default abstract class EventEmitter<EventName = string> {
-    private event_handlers;
+    private eventHandlers;
     constructor();
     on(ev: EventName, handler: EventHandler): void;
     protected isListening(ev: EventName): boolean;

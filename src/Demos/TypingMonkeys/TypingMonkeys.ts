@@ -1,17 +1,19 @@
 import { Darwin, DarwinParams } from "../../Darwin";
 import { Chromosome } from "../../Chromosome";
 
-export const alphabet = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k',
+export const alphabet = [
+    'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k',
     'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', ' ',
     'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T',
     'U', 'V', 'W', 'X', 'Y', 'Z', '?', '!', '.', '#', '@', '&', '*', '$', '%', '+', '-', '/', '=',
-    '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '(', ')', ',', "'", '"', ':', '_', '-'];
+    '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '(', ')', ',', "'", '"', ':', '_', '-'
+];
 
-export function rand_char(): string {
+export function randChar(): string {
     return alphabet[Math.floor(Math.random() * alphabet.length)];
 }
 
-function string_dist(a: string, b: string): number {
+function stringDist(a: string, b: string): number {
     let diff = 0, e = Math.max(a.length, b.length) - Math.min(a.length, b.length);
 
     for (let i = 0; i < Math.min(a.length, b.length); i++) {
@@ -22,61 +24,47 @@ function string_dist(a: string, b: string): number {
 }
 
 export interface GenerationInfo {
-    avg_fitness: number,
+    averageFitness: number,
     fittest: Chromosome<string>,
     generation: number
 }
 
 export class MonkeyFactory {
+    private params: DarwinParams<string>;
 
-    private params: DarwinParams<string>
-
-    constructor(params: DarwinParams<string>) {
-        this.params = params;
-        this.params.rand_gene = rand_char;
+    constructor(params: Omit<DarwinParams<string>, 'randGene'>) {
+        this.params = { ...params, randGene: randChar };
     }
 
-    public *search(target: string): IterableIterator<GenerationInfo> {
-
-        this.params.chromosome_length = target.length;
-
-        const genetics = new Darwin<string>(this.params);
+    public *search(target: string): Iterator<GenerationInfo> {
+        this.params.chromosomeLength = target.length;
+        const population = new Darwin(this.params);
 
         while (true) {
-
             // update the fitness
-            for (const bob of genetics.getPopulation()) {
+            for (const bob of population.getPopulation()) {
                 const p = bob.getGenes().join('');
-                const d = string_dist(p, target);
+                const d = stringDist(p, target);
 
                 bob.setFitness(2 ** (target.length - d));
 
                 if (d === 0) {
                     return {
-                        generation: genetics.getGeneration(),
-                        avg_fitness: genetics.getAverageFitness(),
+                        generation: population.getGeneration(),
+                        averageFitness: population.getAverageFitness(),
                         fittest: bob
                     };
                 }
             }
 
             // mating time!
-            genetics.mate();
+            population.mate();
 
             yield {
-                avg_fitness: genetics.getAverageFitness(),
-                fittest: genetics.getFittest(),
-                generation: genetics.getGeneration()
+                averageFitness: population.getAverageFitness(),
+                fittest: population.getFittest(),
+                generation: population.getGeneration()
             };
         }
-
-    }
-
-    public getParams(): Readonly<DarwinParams<string>> {
-        return this.params;
-    }
-
-    public setParams(params: DarwinParams<string>): void {
-        this.params = params;
     }
 }

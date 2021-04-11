@@ -2,37 +2,36 @@ import { Vector2D } from "./Vector2D";
 import { MathUtils } from "./MathUtils";
 
 export class Eater {
-
-    public closest_food: Vector2D;
-    public food_dir: Vector2D;
+    public closestFood: Vector2D;
+    public foodDir: Vector2D;
     public lookat: Vector2D;
-    private _pos: Vector2D;
-    private _angle: number;
+    private pos: Vector2D;
+    private angle: number;
     private chromosomeIdx: number;
 
     constructor(pos: Vector2D, angle: number, chromosomeIdx: number) {
-        this._pos = pos;
-        this._angle = angle;
+        this.pos = pos;
+        this.angle = angle;
         this.chromosomeIdx = chromosomeIdx;
     }
 
-    getChromosomeIdx(): number {
+    public getChromosomeIdx(): number {
         return this.chromosomeIdx;
     }
 
-    get position(): Vector2D {
-        return this._pos;
+    public getPosition(): Vector2D {
+        return this.pos;
     }
 
-    set position(new_pos: Vector2D) {
-        this._pos = new_pos;
+    public setPosition(newPosition: Vector2D) {
+        this.pos = newPosition;
     }
 
-    get angle(): number {
-        return this._angle;
+    public getAngle(): number {
+        return this.angle;
     }
 
-    set angle(angle: number) {
-        this._angle = angle % MathUtils.TWO_PI;
+    public setAngle(angle: number) {
+        this.angle = angle % MathUtils.TWO_PI;
     }
 }

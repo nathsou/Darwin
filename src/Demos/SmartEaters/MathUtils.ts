@@ -1,5 +1,4 @@
 export namespace MathUtils {
-
     export const clamp = (value: number, min: number, max: number): number => {
         if (value >= min && value <= max) return value;
         if (value < min) return min;
@@ -11,5 +10,4 @@ export namespace MathUtils {
     };
 
     export const TWO_PI = 2 * Math.PI;
-
 }

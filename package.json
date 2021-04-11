@@ -2,7 +2,7 @@
   "name": "charles.darwin",
   "module": "lib/js/Darwin.js",
   "types": "lib/types/Darwin.d.ts",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Flexible Genetic Algorithm Library",
   "scripts": {
     "start": "webpack-dev-server --mode development -d",
@@ -22,12 +22,12 @@
     "Evolution"
   ],
   "devDependencies": {
-    "typescript": "^3.4.5",
-    "ts-loader": "^6.0.1",
-    "webpack": "^4.32.2",
-    "webpack-cli": "^3.3.2",
-    "webpack-dev-server": "^3.4.1",
-    "html-webpack-plugin": "^3.2.0"
+    "html-webpack-plugin": "^5.3.1",
+    "ts-loader": "^8.1.0",
+    "typescript": "^4.2.4",
+    "webpack": "^5.31.2",
+    "webpack-cli": "^4.6.0",
+    "webpack-dev-server": "^3.11.2"
   },
   "author": "Nathan Soufflet",
   "license": "MIT",

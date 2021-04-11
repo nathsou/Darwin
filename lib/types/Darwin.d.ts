@@ -2,22 +2,22 @@ import { Chromosome } from "./Chromosome";
 import { CrossoverMethod, CustomCrossoverMethod } from "./CrossoverMethods";
 import { CustomMutationMethod, MutationMethod } from "./MutationMethod";
 export interface DarwinParams<T> {
-    population_size: number;
-    chromosome_length: number;
-    rand_gene: () => T;
-    crossover_rate?: number;
-    mutation_rate?: number;
-    crossover_method?: CrossoverMethod | CustomCrossoverMethod<T>;
-    mutation_method?: MutationMethod | CustomMutationMethod<T>;
-    elite_count?: number;
-    elite_copies?: number;
+    populationSize: number;
+    chromosomeLength: number;
+    randGene: () => T;
+    crossoverRate?: number;
+    mutationRate?: number;
+    crossoverMethod?: CrossoverMethod | CustomCrossoverMethod<T>;
+    mutationMethod?: MutationMethod | CustomMutationMethod<T>;
+    eliteCount?: number;
+    eliteCopies?: number;
 }
 export interface DarwinStats<T> {
     fittest: Chromosome<T>;
-    fittest_idx: number;
-    avg_fitness: number;
-    sum_fitness: number;
-    needs_update: boolean;
+    fittestIndex: number;
+    averageFitness: number;
+    totalFitness: number;
+    needsUpdate: boolean;
 }
 export declare type FitnessEvaluator<T> = (chromo: Readonly<T>[]) => number;
 export declare class Darwin<T> {
@@ -29,16 +29,26 @@ export declare class Darwin<T> {
     private duplicateElite;
     private crossover;
     private mutate;
-    updateFitness(fitness_evaluator: FitnessEvaluator<T>): void;
+    /**
+     * Updates the fitness of the entire population
+     * by evaluating the fitness of each chromosome
+     * using the given function
+     */
+    updateFitness(fitnessEvaluator: FitnessEvaluator<T>): void;
+    /**
+     * generates a new generation
+     * the fitness of each Chromosome must be updated before calling mate
+     * using setFitness or updateFitness
+     */
     mate(): void;
-    getPopulation(): Chromosome<T>[];
-    getChromosome(idx: number): Chromosome<T>;
+    getPopulation(): Readonly<Array<Chromosome<T>>>;
+    getChromosomeAt(index: number): Chromosome<T>;
     getRandomChromosome(): Chromosome<T>;
-    getTopChromosomes(count: number): Chromosome<T>[];
+    getTopChromosomes(count: number): Readonly<Array<Chromosome<T>>>;
     getAverageFitness(): Readonly<number>;
     getFittest(): Chromosome<T>;
     getParams(): Readonly<DarwinParams<T>>;
     getGeneration(): Readonly<number>;
     getStats(): Readonly<DarwinStats<T>>;
-    updateStats(force_update?: boolean): void;
+    updateStats(forceUpdate?: boolean): void;
 }

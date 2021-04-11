@@ -5,16 +5,15 @@ import { CrossoverMethod } from "../../CrossoverMethods";
 import { shuffle } from "./Utils";
 
 export class TSPOptimizer {
-
     private CITY_COUNT: number;
     private genetics: Darwin<number>;
     private tsp: TSP;
     private shuffled: number[] = [];
     private model: number[] = [];
-    private convergence_threshold = 30;
-    private max_generation = 5000;
-    private fitness_k = 15;
-    private best_path: number[];
+    private convergenceThreshold = 30;
+    private maxGenerations = 5000;
+    private fitnessFactor = 15;
+    private bestPath: number[];
 
     constructor(cities: Point[] = []) {
         this.CITY_COUNT = cities.length;
@@ -25,32 +24,32 @@ export class TSPOptimizer {
         }
 
         this.genetics = new Darwin<number>({
-            population_size: 500,
-            chromosome_length: this.CITY_COUNT,
-            rand_gene: (() => {
+            populationSize: 500,
+            chromosomeLength: this.CITY_COUNT,
+            randGene: (() => {
                 if (this.shuffled.length === 0) {
                     this.shuffled = shuffle(this.model);
                 }
                 return this.shuffled.pop();
             }).bind(this),
-            crossover_method: CrossoverMethod.ORDERED,
-            mutation_method: MutationMethod.SWAP,
-            elite_count: 5
+            crossoverMethod: CrossoverMethod.ORDERED,
+            mutationMethod: MutationMethod.SWAP,
+            eliteCount: 5
         });
 
-        let rect_w = cities.reduce((a: number, b: Point) => a > b.x ? a : b.x, 0),
-            rect_h = cities.reduce((a: number, b: Point) => a > b.y ? a : b.y, 0);
+        const rectWidth = cities.reduce((a: number, b: Point) => a > b.x ? a : b.x, 0);
+        const rectHeight = cities.reduce((a: number, b: Point) => a > b.y ? a : b.y, 0);
 
-        this.fitness_k *= avg_dist_rect(rect_w, rect_h) * this.CITY_COUNT;
-        this.best_path = this.genetics.getFittest().getGenes();
+        this.fitnessFactor *= avgRectDist(rectWidth, rectHeight) * this.CITY_COUNT;
+        this.bestPath = this.genetics.getFittest().getGenes();
     }
 
     private pathFitness(path: number[]): number {
-        return 2 ** (this.fitness_k / this.tsp.distance(path));
+        return 2 ** (this.fitnessFactor / this.tsp.distance(path));
     }
 
     private distanceFromFitness(fitness: number): number {
-        return this.fitness_k / Math.log2(fitness);
+        return this.fitnessFactor / Math.log2(fitness);
     }
 
     private newGen(): void {
@@ -59,31 +58,32 @@ export class TSPOptimizer {
     }
 
     public *optimize(): IterableIterator<number[]> {
+        let minDist = Infinity;
+        let count = 0;
 
-        let min_dist = Infinity, count = 0;
-
-        while (this.genetics.getGeneration() !== this.max_generation && count !== this.convergence_threshold) {
+        while (this.genetics.getGeneration() !== this.maxGenerations && count !== this.convergenceThreshold) {
             this.newGen();
             const fittest = this.genetics.getFittest();
 
-            const dist = this.tsp.distance_squared(fittest.getGenes()) // this.distanceFromFitness(fittest.getFitness());
-            if (dist >= min_dist) {
+            // this.distanceFromFitness(fittest.getFitness());
+            const dist = this.tsp.distanceSquared(fittest.getGenes());
+            if (dist >= minDist) {
                 count++;
             } else {
-                min_dist = dist;
-                this.best_path = [...fittest.getGenes()];
+                minDist = dist;
+                this.bestPath = [...fittest.getGenes()];
                 count = 0;
             }
 
-            yield this.best_path;
+            yield this.bestPath;
         }
 
-        return this.best_path;
+        return this.bestPath;
 
     }
 
     public drawShortestPath(ctx: CanvasRenderingContext2D): void {
-        this.tsp.draw(ctx, this.best_path);
+        this.tsp.draw(ctx, this.bestPath);
 
         ctx.fillStyle = 'black';
         ctx.fillText(`generation : ${this.genetics.getGeneration()}`, 5, 15);
@@ -97,8 +97,7 @@ export class TSPOptimizer {
 }
 
 //http://www.math.uni-muenster.de/reine/u/burgstal/d18.pdf
-function avg_dist_rect(w: number, h: number) {
-
+function avgRectDist(w: number, h: number) {
     const w2 = w ** 2;
     const w3 = w ** 3;
     const h2 = h ** 2;

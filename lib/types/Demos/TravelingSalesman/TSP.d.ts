@@ -4,13 +4,13 @@ export interface Point {
 }
 export declare class TSP {
     private cities;
-    private dist_map;
+    private distMap;
     constructor(cities: Point[]);
     private dist2D;
-    private dist2D_squared;
+    private dist2DSquared;
     checkPathValidity(path: number[]): boolean;
     distance(path: number[]): number;
-    distance_squared(path: number[]): number;
+    distanceSquared(path: number[]): number;
     getCities(): Point[];
     getCity(idx: number): Point;
     draw(ctx: CanvasRenderingContext2D, path: number[]): void;

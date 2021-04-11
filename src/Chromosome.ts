@@ -2,36 +2,29 @@ import { CrossoverMethod, CustomCrossoverMethod } from "./CrossoverMethods";
 import EventEmitter from "./EventEmitter";
 import { CustomMutationMethod, MutationMethod } from "./MutationMethod";
 
-export interface Offspring<T> {
-    baby1: T[],
-    baby2: T[]
-}
+export type Offspring<T> = [baby1: T[], baby2: T[]];
 
 export class Chromosome<T> extends EventEmitter<'update_fitness'> {
-
     private length: number;
     private genes: T[] = [];
     private fitness = 0;
-    private rand_gene: () => T;
+    private randGene: () => T;
 
-    constructor(length: number, rand_gene: () => T);
-    constructor(genes: T[], rand_gene: () => T);
-    constructor(length_or_genes: number | T[], rand_gene: () => T) {
+    constructor(genes: T[], randGene: () => T) {
         super();
 
-        this.rand_gene = rand_gene;
+        this.randGene = randGene;
+        this.genes = genes;
+        this.length = genes.length;
+    }
 
-        if (typeof length_or_genes === 'number') {
-            this.length = length_or_genes;
-
-            for (let i = 0; i < this.length; i++) {
-                this.genes.push(rand_gene());
-            }
-
-        } else {
-            this.genes = length_or_genes;
-            this.length = length_or_genes.length;
+    public static generate<T>(count: number, randGene: () => T) {
+        const genes: T[] = [];
+        for (let i = 0; i < count; i++) {
+            genes.push(randGene());
         }
+
+        return new Chromosome<T>(genes, randGene);
     }
 
     public getFitness(): number {
@@ -45,7 +38,6 @@ export class Chromosome<T> extends EventEmitter<'update_fitness'> {
 
     // returns the number of bits which are different = Hamming distance
     public compare(bob: Chromosome<T>): number {
-
         let count = 0;
 
         for (let i = 0; i < Math.min(this.length, bob.length); i++) {
@@ -55,17 +47,17 @@ export class Chromosome<T> extends EventEmitter<'update_fitness'> {
         return count;
     }
 
-    private mutate_flip(mut_rate: number): void {
+    private mutateFlip(mutationRate: number): void {
         for (let i = 0; i < this.length; i++) {
-            if (Math.random() < mut_rate) {
-                this.genes[i] = this.rand_gene();
+            if (Math.random() < mutationRate) {
+                this.genes[i] = this.randGene();
             }
         }
     }
 
-    private mutate_swap(mut_rate: number): void {
+    private mutateSwap(mutationRate: number): void {
         for (let i = 0; i < this.length; i++) {
-            if (Math.random() < mut_rate) {
+            if (Math.random() < mutationRate) {
                 const j = Math.floor(Math.random() * this.length);
                 const tmp = this.genes[i];
 
@@ -75,16 +67,15 @@ export class Chromosome<T> extends EventEmitter<'update_fitness'> {
         }
     }
 
-    public mutate(mut_rate = 1 / this.length, method: MutationMethod | CustomMutationMethod<T>): void {
-
+    public mutate(mutationRate = 1 / this.length, method: MutationMethod | CustomMutationMethod<T>): void {
         if (typeof method === 'number') {
             switch (method) {
                 case MutationMethod.FLIP:
-                    this.mutate_flip(mut_rate);
+                    this.mutateFlip(mutationRate);
                     break;
 
                 case MutationMethod.SWAP:
-                    this.mutate_swap(mut_rate);
+                    this.mutateSwap(mutationRate);
                     break;
             }
         } else {
@@ -92,35 +83,34 @@ export class Chromosome<T> extends EventEmitter<'update_fitness'> {
         }
     }
 
-    private crossover_single_point(bob: Chromosome<T>): Offspring<T> {
-
+    private crossoverSinglePoint(bob: Chromosome<T>): Offspring<T> {
         const p = Math.floor(Math.random() * this.length);
-
         const b1 = [...this.genes.slice(0, p), ...bob.genes.slice(p)];
         const b2 = [...bob.genes.slice(0, p), ...this.genes.slice(p)];
 
-        return { baby1: b1, baby2: b2 };
+        return [b1, b2];
     }
 
-    private crossover_two_point(bob: Chromosome<T>): Offspring<T> {
-
+    private crossoverTwoPoint(bob: Chromosome<T>): Offspring<T> {
         const b1: T[] = [];
         const b2: T[] = [];
 
         let p1 = Math.floor(Math.random() * this.length);
         let p2 = Math.floor(Math.random() * this.length);
 
-        if (p1 > p2) [p1, p2] = [p2, p1];
+        if (p1 > p2) {
+            [p1, p2] = [p2, p1];
+        }
 
         for (let i = 0; i < this.length; i++) {
             b1.push(i < p1 ? this.genes[i] : (i < p2 ? bob.genes[i] : this.genes[i]));
             b2.push(i < p1 ? bob.genes[i] : (i < p2 ? this.genes[i] : bob.genes[i]));
         }
 
-        return { baby1: b1, baby2: b2 };
+        return [b1, b2];
     }
 
-    private crossover_uniform(bob: Chromosome<T>): Offspring<T> {
+    private crossoverUniform(bob: Chromosome<T>): Offspring<T> {
         const b1: T[] = [];
         const b2: T[] = [];
 
@@ -130,48 +120,50 @@ export class Chromosome<T> extends EventEmitter<'update_fitness'> {
             b2.push(swap ? this.genes[i] : bob.genes[i]);
         }
 
-        return { baby1: b1, baby2: b2 };
+        return [b1, b2];
     }
 
-    private crossover_half_uniform(bob: Chromosome<T>): Offspring<T> {
+    private crossoverHalfUniform(bob: Chromosome<T>): Offspring<T> {
         let b1: T[] = [];
         let b2: T[] = [];
 
-        let diff_bits: number[] = [];
+        const diffBits: number[] = [];
 
-        for (let i = 0; i < this.length; i++)
-            if (this.genes[i] !== bob.genes[i])
-                diff_bits.push(i);
+        for (let i = 0; i < this.length; i++) {
+            if (this.genes[i] !== bob.genes[i]) {
+                diffBits.push(i);
+            }
+        }
 
-        let N = diff_bits.length;
+        const N = diffBits.length;
 
         b1 = this.genes.slice();
         b2 = bob.genes.slice();
 
         for (let i = 0; i < N / 2; i++) {
-            let idx = Math.floor(Math.random() * diff_bits.length);
-            b1[diff_bits[idx]] = bob.genes[diff_bits[idx]];
-            b2[diff_bits[idx]] = this.genes[diff_bits[idx]];
-            diff_bits.splice(idx, 1);
+            let idx = Math.floor(Math.random() * diffBits.length);
+            b1[diffBits[idx]] = bob.genes[diffBits[idx]];
+            b2[diffBits[idx]] = this.genes[diffBits[idx]];
+            diffBits.splice(idx, 1);
         }
 
-        return { baby1: b1, baby2: b2 };
+        return [b1, b2];
     }
 
-    private crossover_ordered(bob: Chromosome<T>): Offspring<T> {
+    private crossoverOrdered(bob: Chromosome<T>): Offspring<T> {
         const b1: T[] = [];
         const b2: T[] = [];
 
-        let inf = Math.floor(Math.random() * this.length),
-            sup = Math.floor(Math.random() * this.length),
-            tmp = inf;
+        let inf = Math.floor(Math.random() * this.length);
+        let sup = Math.floor(Math.random() * this.length);
+        let tmp = inf;
 
         inf = Math.min(inf, sup);
         sup = Math.max(tmp, sup);
 
         for (let i = inf; i < sup; i++) {
-            b1[i] = (inf <= i && i <= sup) ? bob.genes[i] : undefined;
-            b2[i] = (inf <= i && i <= sup) ? this.genes[i] : undefined;
+            b1[i] = bob.genes[i];
+            b2[i] = this.genes[i];
         }
 
         for (let i = 0; i < this.length; i++) {
@@ -197,27 +189,26 @@ export class Chromosome<T> extends EventEmitter<'update_fitness'> {
 
         }
 
-        return { baby1: b1, baby2: b2 };
+        return [b1, b2];
     }
 
     public crossover(bob: Chromosome<T>, method: CrossoverMethod | CustomCrossoverMethod<T>): Offspring<T> {
-
         if (typeof method === 'number') {
             switch (method) {
                 case CrossoverMethod.SINGLE_POINT:
-                    return this.crossover_single_point(bob);
+                    return this.crossoverSinglePoint(bob);
 
                 case CrossoverMethod.TWO_POINT:
-                    return this.crossover_two_point(bob);
+                    return this.crossoverTwoPoint(bob);
 
                 case CrossoverMethod.UNIFORM:
-                    return this.crossover_uniform(bob);
+                    return this.crossoverUniform(bob);
 
                 case CrossoverMethod.HALF_UNIFORM:
-                    return this.crossover_half_uniform(bob);
+                    return this.crossoverHalfUniform(bob);
 
                 case CrossoverMethod.ORDERED:
-                    return this.crossover_ordered(bob);
+                    return this.crossoverOrdered(bob);
                 default:
                     throw new Error(`Unimplemented CrossoverMethod: ${method} (${CrossoverMethod[method]})`);
             }
@@ -236,14 +227,14 @@ export class Chromosome<T> extends EventEmitter<'update_fitness'> {
 
     public copy(bob: Chromosome<T>): void {
         this.genes = bob.genes.slice();
-        this.rand_gene = bob.rand_gene;
+        this.length = bob.length;
+        this.randGene = bob.randGene;
         this.fitness = bob.fitness;
     }
 
     public clone(): Chromosome<T> {
-        let c = new Chromosome<T>(this.length, this.rand_gene);
-        c.copy(this);
-        return c;
+        const clone = Chromosome.generate(this.length, this.randGene);
+        clone.copy(this);
+        return clone;
     }
-
 }

@@ -3,13 +3,13 @@ import { NeuralNetFunction } from "./NeuralNet";
 export declare class EaterAnalysis {
     private cnv;
     private ctx;
-    private food_pos;
+    private foodPos;
     private eater;
     private params;
     private brain;
     private paused;
-    constructor(params: EatersParams, brain: NeuralNetFunction);
-    private on_resize;
+    constructor(params: Required<EatersParams>, brain: NeuralNetFunction);
+    private onResize;
     update(): void;
     pause(): void;
     start(): void;
@@ -17,6 +17,6 @@ export declare class EaterAnalysis {
     private render;
     private drawFood;
     private drawEeater;
-    readonly domElement: HTMLCanvasElement;
+    get domElement(): HTMLCanvasElement;
     static fromBlob(blob: Blob | string): Promise<EaterAnalysis>;
 }

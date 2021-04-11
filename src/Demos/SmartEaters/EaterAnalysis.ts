@@ -6,40 +6,39 @@ import { Eater } from "./Eater";
 
 // Study a single Eater at a time
 export class EaterAnalysis {
-
     private cnv: HTMLCanvasElement;
     private ctx: CanvasRenderingContext2D;
-    private food_pos: Vector2D;
+    private foodPos: Vector2D;
     private eater: Eater;
-    private params: EatersParams;
+    private params: Required<EatersParams>;
     private brain: Function;
-
     private paused = true;
 
-    constructor(params: EatersParams, brain: NeuralNetFunction) {
-
+    constructor(params: Required<EatersParams>, brain: NeuralNetFunction) {
         this.params = params;
+        // this is evil
         this.brain = new Function(...brain.args, brain.body);
 
         this.cnv = document.createElement('canvas');
         this.cnv.width = window.innerWidth;
         this.cnv.height = window.innerHeight;
-        this.ctx = this.cnv.getContext('2d');
 
-        this.food_pos = Vector2D.rand().hadamard([this.cnv.width, this.cnv.height]);
+        const ctx = this.cnv.getContext('2d');
+        if (ctx === null) {
+            throw new Error(`Could not get a 2d canvas context`);
+        }
 
-        window.addEventListener('resize', () => this.on_resize());
-
+        this.foodPos = Vector2D.rand().hadamard([this.cnv.width, this.cnv.height]);
+        window.addEventListener('resize', () => this.onResize());
         this.eater = new Eater(Vector2D.rand().hadamard([this.cnv.width, this.cnv.height]), Math.random() * Math.PI * 2, 0);
-
     }
 
-    private on_resize(): void {
+    private onResize(): void {
         this.cnv.width = window.innerWidth;
         this.cnv.height = window.innerHeight;
 
-        if (this.cnv.width < this.food_pos.x || this.cnv.height < this.food_pos.y) {
-            this.food_pos = Vector2D.rand().hadamard([this.cnv.width, this.cnv.height]);
+        if (this.cnv.width < this.foodPos.x || this.cnv.height < this.foodPos.y) {
+            this.foodPos = Vector2D.rand().hadamard([this.cnv.width, this.cnv.height]);
         }
     }
 
@@ -48,7 +47,7 @@ export class EaterAnalysis {
         this.render();
 
         if (!this.paused) {
-            requestAnimationFrame(() => this.update());
+            requestAnimationFrame(this.update);
         }
     }
 
@@ -62,41 +61,41 @@ export class EaterAnalysis {
     }
 
     private tick(): void {
-        if (this.eater.position.dist(this.food_pos) <= (this.params.eater_size + this.params.food_size) / 2) {
-            this.food_pos = Vector2D.rand().hadamard([this.cnv.width, this.cnv.height]);
+        if (this.eater.getPosition().dist(this.foodPos) <= (this.params.eaterSize + this.params.foodSize) / 2) {
+            this.foodPos = Vector2D.rand().hadamard([this.cnv.width, this.cnv.height]);
         }
 
-        this.eater.food_dir = this.food_pos.sub(this.eater.position.normalize());
+        this.eater.foodDir = this.foodPos.sub(this.eater.getPosition().normalize());
 
-        const [turn_left, turn_right] = this.brain([
-            Math.cos(this.eater.angle),
-            Math.sin(this.eater.angle),
-            this.eater.food_dir.x,
-            this.eater.food_dir.y
+        const [turnLeft, turnRight] = this.brain([
+            Math.cos(this.eater.getAngle()),
+            Math.sin(this.eater.getAngle()),
+            this.eater.foodDir.x,
+            this.eater.foodDir.y
         ]);
 
-        const rot_force = MathUtils.clamp(
-            turn_left - turn_right,
-            -this.params.max_turn_rate,
-            this.params.max_turn_rate
+        const rotationForce = MathUtils.clamp(
+            turnLeft - turnRight,
+            -this.params.maxTurnRate,
+            this.params.maxTurnRate
         );
 
-        this.eater.angle += rot_force;
+        this.eater.setAngle(this.eater.getAngle() + rotationForce);
 
-        this.eater.lookat = new Vector2D(Math.cos(this.eater.angle), Math.sin(this.eater.angle));
+        this.eater.lookat = new Vector2D(Math.cos(this.eater.getAngle()), Math.sin(this.eater.getAngle()));
 
-        this.eater.position.plus(this.eater.lookat.times(this.params.max_speed));
+        this.eater.getPosition().plus(this.eater.lookat.times(this.params.maxSpeed));
 
-        if (this.params.wrap_borders) {
-            if (this.eater.position.x > this.cnv.width) this.eater.position.x = 0;
-            if (this.eater.position.x < 0) this.eater.position.x = this.cnv.width;
-            if (this.eater.position.y > this.cnv.height) this.eater.position.y = 0;
-            if (this.eater.position.y < 0) this.eater.position.y = this.cnv.height;
+        if (this.params.wrapBorders) {
+            if (this.eater.getPosition().x > this.cnv.width) this.eater.getPosition().x = 0;
+            if (this.eater.getPosition().x < 0) this.eater.getPosition().x = this.cnv.width;
+            if (this.eater.getPosition().y > this.cnv.height) this.eater.getPosition().y = 0;
+            if (this.eater.getPosition().y < 0) this.eater.getPosition().y = this.cnv.height;
         } else {
-            if (this.eater.position.x > this.cnv.width) this.eater.position.x = this.cnv.width;
-            if (this.eater.position.x < 0) this.eater.position.x = 0;
-            if (this.eater.position.y > this.cnv.height) this.eater.position.y = this.cnv.height;
-            if (this.eater.position.y < 0) this.eater.position.y = 0;
+            if (this.eater.getPosition().x > this.cnv.width) this.eater.getPosition().x = this.cnv.width;
+            if (this.eater.getPosition().x < 0) this.eater.getPosition().x = 0;
+            if (this.eater.getPosition().y > this.cnv.height) this.eater.getPosition().y = this.cnv.height;
+            if (this.eater.getPosition().y < 0) this.eater.getPosition().y = 0;
         }
     }
 
@@ -107,10 +106,10 @@ export class EaterAnalysis {
     }
 
     private drawFood(): void {
-        const fs = this.params.food_size;
+        const fs = this.params.foodSize;
         this.ctx.fillStyle = 'rgb(52, 73, 94)';
         this.ctx.beginPath();
-        this.ctx.fillRect(this.food_pos.x - fs / 2, this.food_pos.y - fs / 2, fs, fs);
+        this.ctx.fillRect(this.foodPos.x - fs / 2, this.foodPos.y - fs / 2, fs, fs);
         this.ctx.fill();
     }
 
@@ -119,21 +118,21 @@ export class EaterAnalysis {
         this.ctx.fillStyle = 'rgb(22, 160, 133)';
 
         this.ctx.beginPath();
-        const la = this.eater.lookat.times(this.params.eater_size).add(this.eater.position);
-        const a = la.sub(this.eater.position).angle();
+        const la = this.eater.lookat.times(this.params.eaterSize).add(this.eater.getPosition());
+        const a = la.sub(this.eater.getPosition()).angle();
         const b = Math.PI / 1.3;
         const u = new Vector2D(Math.cos(a + b), Math.sin(a + b));
         const v = new Vector2D(Math.cos(a - b), Math.sin(a - b));
-        const p1 = this.eater.position.add(u.times(this.params.eater_size));
-        const p2 = this.eater.position.add(v.times(this.params.eater_size));
+        const p1 = this.eater.getPosition().add(u.times(this.params.eaterSize));
+        const p2 = this.eater.getPosition().add(v.times(this.params.eaterSize));
         this.ctx.moveTo(p1.x, p1.y);
         this.ctx.lineTo(la.x, la.y);
         this.ctx.lineTo(p2.x, p2.y);
         this.ctx.fill();
 
         this.ctx.strokeStyle = 'black';
-        this.ctx.moveTo(this.eater.position.x, this.eater.position.y);
-        const fd = this.eater.position.add(this.eater.food_dir.times(this.params.eater_size * 2));
+        this.ctx.moveTo(this.eater.getPosition().x, this.eater.getPosition().y);
+        const fd = this.eater.getPosition().add(this.eater.foodDir.times(this.params.eaterSize * 2));
         this.ctx.lineTo(fd.x, fd.y);
         this.ctx.stroke();
     }
@@ -143,19 +142,17 @@ export class EaterAnalysis {
     }
 
     public static fromBlob(blob: Blob | string): Promise<EaterAnalysis> {
-
         return new Promise<EaterAnalysis>(async (resolve, reject) => {
             try {
                 const data = JSON.parse(await (await fetch(blob.toString())).text()) as {
-                    params: EatersParams,
+                    params: Required<EatersParams>,
                     brain: NeuralNetFunction
                 };
-                console.log(data);
+
                 resolve(new EaterAnalysis(data.params, data.brain));
             } catch (err) {
                 reject(err);
             }
         });
     };
-
 }

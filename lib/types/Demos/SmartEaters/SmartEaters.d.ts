@@ -4,20 +4,20 @@ import { Eater } from "./Eater";
 import { NeuralNetFunction } from "./NeuralNet";
 export declare const DPR: number;
 export interface EatersParams {
-    population_size?: number;
-    hidden_layers_sizes?: number[];
-    food_count?: number;
-    crossover_rate?: number;
-    mutation_rate?: number;
-    elite_count?: number;
-    elite_copies?: number;
-    max_speed?: number;
-    max_turn_rate?: number;
-    ticks_per_gen?: number;
-    crossover_method?: CrossoverMethod;
-    eater_size?: number;
-    food_size?: number;
-    wrap_borders?: boolean;
+    populationSize?: number;
+    hiddenLayersSizes?: number[];
+    foodCount?: number;
+    crossoverRate?: number;
+    mutationRate?: number;
+    eliteCount?: number;
+    eliteCopies?: number;
+    maxSpeed?: number;
+    maxTurnRate?: number;
+    ticksPerGen?: number;
+    crossoverMethod?: CrossoverMethod;
+    eaterSize?: number;
+    foodSize?: number;
+    wrapBorders?: boolean;
 }
 export declare class SmartEaters {
     private genetics;
@@ -27,15 +27,15 @@ export declare class SmartEaters {
     private population;
     private food;
     private ticks;
-    private layer_sizes;
-    private selected_idx;
-    follow_fittest: boolean;
+    private layerSizes;
+    private selectedIndex;
+    followFittest: boolean;
     private paused;
-    private fast_mode;
-    fast_mode_refresh_rate: number;
-    show_lines: boolean;
-    hide_non_selected: boolean;
-    stop_mating: boolean;
+    private fastMode;
+    fastModeRefreshRate: number;
+    showLines: boolean;
+    hideNonSelected: boolean;
+    stopMating: boolean;
     private params;
     constructor(cnv: HTMLCanvasElement, params?: EatersParams);
     private spawnFood;
@@ -58,6 +58,6 @@ export declare class SmartEaters {
     getDarwinInstance(): Darwin<number>;
     getFittestBrain(): NeuralNetFunction;
     toggleMating(): void;
-    readonly selectedIdx: number;
-    readonly parameters: Readonly<EatersParams>;
+    getSelectedIndex(): number;
+    getParameters(): Readonly<EatersParams>;
 }

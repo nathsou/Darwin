@@ -5,10 +5,10 @@ export declare class TSPOptimizer {
     private tsp;
     private shuffled;
     private model;
-    private convergence_threshold;
-    private max_generation;
-    private fitness_k;
-    private best_path;
+    private convergenceThreshold;
+    private maxGenerations;
+    private fitnessFactor;
+    private bestPath;
     constructor(cities?: Point[]);
     private pathFitness;
     private distanceFromFitness;

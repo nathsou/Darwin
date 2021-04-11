@@ -1,9 +1,6 @@
 
 export class Vector2D {
-
-    constructor(public x: number, public y: number) {
-
-    }
+    constructor(public x: number, public y: number) { }
 
     public add(v: Vector2D): Vector2D {
         return new Vector2D(this.x + v.x, this.y + v.y);
@@ -39,7 +36,7 @@ export class Vector2D {
         return this.dot(this) ** 0.5;
     }
 
-    public norm_sq(): number {
+    public normSq(): number {
         return this.dot(this);
     }
 
@@ -55,8 +52,8 @@ export class Vector2D {
         return this.sub(v).norm();
     }
 
-    public dist_sq(v: Vector2D): number {
-        return this.sub(v).norm_sq();
+    public distSq(v: Vector2D): number {
+        return this.sub(v).normSq();
     }
 
     public map(f: (x: number) => number): Vector2D {

@@ -1,16 +1,14 @@
 import { DarwinParams } from "../../Darwin";
 import { Chromosome } from "../../Chromosome";
 export declare const alphabet: string[];
-export declare function rand_char(): string;
+export declare function randChar(): string;
 export interface GenerationInfo {
-    avg_fitness: number;
+    averageFitness: number;
     fittest: Chromosome<string>;
     generation: number;
 }
 export declare class MonkeyFactory {
     private params;
-    constructor(params: DarwinParams<string>);
-    search(target: string): IterableIterator<GenerationInfo>;
-    getParams(): Readonly<DarwinParams<string>>;
-    setParams(params: DarwinParams<string>): void;
+    constructor(params: Omit<DarwinParams<string>, 'randGene'>);
+    search(target: string): Iterator<GenerationInfo>;
 }

@@ -3,10 +3,9 @@ export interface NeuralNetFunction {
     body: string;
 }
 export declare class NeuralNet {
-    private weights_and_biases;
-    private num_neurons_per_layer;
+    private weightsAndBiases;
+    private numNeuronsPerLayer;
     private offsets;
-    constructor();
     getWeight(l: number, j: number, k: number): number;
     getBias(l: number, j: number): number;
     feedforward(inputs: number[]): number[];

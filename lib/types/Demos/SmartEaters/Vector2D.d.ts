@@ -9,11 +9,11 @@ export declare class Vector2D {
     dot(v: Vector2D): number;
     hadamard(v: Vector2D | number[]): Vector2D;
     norm(): number;
-    norm_sq(): number;
+    normSq(): number;
     times(k: number): Vector2D;
     normalize(): Vector2D;
     dist(v: Vector2D): number;
-    dist_sq(v: Vector2D): number;
+    distSq(v: Vector2D): number;
     map(f: (x: number) => number): Vector2D;
     angle(): number;
     toArray(): number[];

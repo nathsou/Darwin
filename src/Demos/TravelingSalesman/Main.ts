@@ -3,6 +3,10 @@ import { TSPOptimizer } from "./TSPOptimizer";
 const cnv = document.createElement('canvas');
 const ctx = cnv.getContext('2d');
 
+if (ctx === null) {
+    throw new Error(`Could not get a 2d canvas context`);
+}
+
 const dpr = window.devicePixelRatio;
 
 cnv.width = window.innerWidth * dpr;
@@ -26,13 +30,13 @@ for (let i = 0; i < 40; i++) {
     });
 }
 
-const tsp_opt = new TSPOptimizer(cities);
+const tspOpt = new TSPOptimizer(cities);
 
-const optimizer = tsp_opt.optimize();
+const optimizer = tspOpt.optimize();
 
 const update = () => {
     const data = optimizer.next();
-    tsp_opt.drawShortestPath(ctx);
+    tspOpt.drawShortestPath(ctx);
 
     if (!data.done) {
         requestAnimationFrame(update);
@@ -41,4 +45,4 @@ const update = () => {
 
 update();
 
-tsp_opt.drawShortestPath(ctx);
+tspOpt.drawShortestPath(ctx);
