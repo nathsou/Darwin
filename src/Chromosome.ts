@@ -9,22 +9,24 @@ export class Chromosome<T> extends EventEmitter<'update_fitness'> {
     private genes: T[] = [];
     private fitness = 0;
     private randGene: () => T;
+    private randNum: () => number;
 
-    constructor(genes: T[], randGene: () => T) {
+    constructor(genes: T[], randomGene: () => T, randomNumber: () => number) {
         super();
 
-        this.randGene = randGene;
+        this.randGene = randomGene;
+        this.randNum = randomNumber;
         this.genes = genes;
         this.length = genes.length;
     }
 
-    public static generate<T>(count: number, randGene: () => T) {
+    public static generate<T>(count: number, randGene: () => T, randomNumber: () => number) {
         const genes: T[] = [];
         for (let i = 0; i < count; i++) {
             genes.push(randGene());
         }
 
-        return new Chromosome<T>(genes, randGene);
+        return new Chromosome<T>(genes, randGene, randomNumber);
     }
 
     public getFitness(): number {
@@ -71,12 +73,21 @@ export class Chromosome<T> extends EventEmitter<'update_fitness'> {
     }
 
     public clone(): Chromosome<T> {
-        const clone = Chromosome.generate(this.length, this.randGene);
+        const clone = Chromosome.generate(
+            this.length,
+            this.randGene,
+            this.randNum
+        );
+
         clone.copy(this);
         return clone;
     }
 
     public randomGene(): T {
         return this.randGene();
+    }
+
+    public randomNumber(): number {
+        return this.randomNumber();
     }
 }

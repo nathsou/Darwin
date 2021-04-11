@@ -31,13 +31,14 @@ On the other hand, the 'Smart Eaters' demo evolves the weights and biases of an 
   const population = new Darwin<T>({
     populationSize: number,
     chromosomeLength: number,
-    randGene: () => T,
-    crossoverRate?: number,
-    mutationRate?: number,
-    crossoverMethod?: CrossoverFunction<T>,
-    mutationMethod?: MutationFunction<T>,
-    eliteCount?: number,
-    eliteCopies?: number
+    randomGene: () => T,
+    crossoverRate?: number = 0.7,
+    mutationRate?: number = 1 / populationSize,
+    crossoverMethod?: CrossoverFunction<T> = crossoverMethod.singlePoint,
+    mutationMethod?: MutationFunction<T> = mutationMethod.flip,
+    eliteCount?: number = Math.ceil(populationSize / 25),
+    eliteCopies?: number = 1,
+    randomNumber: () => number = Math.random
   });
 ```
 

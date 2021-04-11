@@ -32,8 +32,8 @@ export interface GenerationInfo {
 export class MonkeyFactory {
     private params: DarwinParams<string>;
 
-    constructor(params: Omit<DarwinParams<string>, 'randGene'>) {
-        this.params = { ...params, randGene: randChar };
+    constructor(params: Omit<DarwinParams<string>, 'randomGene' | 'randomNumber'>) {
+        this.params = { ...params, randomGene: randChar };
     }
 
     public *search(target: string): Iterator<GenerationInfo> {

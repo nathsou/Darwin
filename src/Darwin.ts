@@ -6,13 +6,14 @@ import { selectKBest } from "./Utils";
 export interface DarwinParams<T> {
     populationSize: number,
     chromosomeLength: number,
-    randGene: () => T,
+    randomGene: () => T,
     crossoverRate?: number,
     mutationRate?: number,
     crossoverMethod?: CrossoverFunction<T>,
     mutationMethod?: MutationFunction<T>,
     eliteCount?: number,
-    eliteCopies?: number
+    eliteCopies?: number,
+    randomNumber?: () => number // a random number between 0 and 1
 }
 
 export interface DarwinStats<T> {
@@ -34,12 +35,6 @@ export class Darwin<T> {
     constructor(params: DarwinParams<T>) {
         const onFitnessUpdate = () => { this.stats.needsUpdate = true; };
 
-        for (let i = 0; i < params.populationSize; i++) {
-            const chromo = Chromosome.generate(params.chromosomeLength, params.randGene);
-            chromo.on('update_fitness', onFitnessUpdate);
-            this.population.push(chromo);
-        }
-
         this.params = {
             crossoverRate: 0.7,
             mutationRate: 1 / params.populationSize,
@@ -47,8 +42,20 @@ export class Darwin<T> {
             mutationMethod: mutationMethod.flip,
             eliteCount: Math.ceil(params.populationSize / 25),
             eliteCopies: 1,
+            randomNumber: Math.random,
             ...params
         };
+
+        for (let i = 0; i < params.populationSize; i++) {
+            const chromo = Chromosome.generate(
+                this.params.chromosomeLength,
+                this.params.randomGene,
+                this.params.randomNumber
+            );
+
+            chromo.on('update_fitness', onFitnessUpdate);
+            this.population.push(chromo);
+        }
 
         this.stats = {
             fittest: this.population[0],
@@ -79,18 +86,21 @@ export class Darwin<T> {
     }
 
     private crossover(newPopulation: Array<Chromosome<T>>): void {
-        const { populationSize, crossoverRate, crossoverMethod, randGene } = this.params;
+        const {
+            populationSize, crossoverRate, crossoverMethod,
+            randomGene, randomNumber
+        } = this.params;
 
         while (newPopulation.length < populationSize) {
-            if (Math.random() < crossoverRate) {
+            if (this.params.randomNumber() < crossoverRate) {
                 const mum = this.getRandomChromosome();
                 const dad = this.getRandomChromosome();
 
                 const [baby1, baby2] = mum.crossoverWith(dad, crossoverMethod);
 
                 newPopulation.push(
-                    new Chromosome<T>(baby1, randGene),
-                    new Chromosome<T>(baby2, randGene)
+                    new Chromosome<T>(baby1, randomGene, randomNumber),
+                    new Chromosome<T>(baby2, randomGene, randomNumber)
                 );
             }
         }
@@ -158,10 +168,10 @@ export class Darwin<T> {
         this.updateStats();
 
         if (this.stats.totalFitness === 0) {
-            return this.population[Math.floor(Math.random() * this.population.length)];
+            return this.population[Math.floor(this.params.randomNumber() * this.population.length)];
         }
 
-        const r = Math.random() * this.stats.totalFitness;
+        const r = this.params.randomNumber() * this.stats.totalFitness;
 
         let accumulatedFitness = 0;
 

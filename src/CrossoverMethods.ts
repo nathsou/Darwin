@@ -6,7 +6,7 @@ type CrossoverMethodName = 'singlePoint' | 'twoPoint' | 'uniform' | 'halfUniform
 
 export const crossoverMethod: { [K in CrossoverMethodName]: CrossoverFunction<any> } = {
     singlePoint: <T>(alice: Chromosome<T>, bob: Chromosome<T>): Offspring<T> => {
-        const p = Math.floor(Math.random() * alice.getGenes().length);
+        const p = Math.floor(alice.randomNumber() * alice.getGenes().length);
         const b1 = [...alice.getGenes().slice(0, p), ...bob.getGenes().slice(p)];
         const b2 = [...bob.getGenes().slice(0, p), ...alice.getGenes().slice(p)];
 
@@ -21,8 +21,8 @@ export const crossoverMethod: { [K in CrossoverMethodName]: CrossoverFunction<an
         const bobsGenes = bob.getGenes();
         const aliceChromoLength = alice.getGenes().length;
 
-        let p1 = Math.floor(Math.random() * aliceChromoLength);
-        let p2 = Math.floor(Math.random() * aliceChromoLength);
+        let p1 = Math.floor(alice.randomNumber() * aliceChromoLength);
+        let p2 = Math.floor(alice.randomNumber() * aliceChromoLength);
 
         if (p1 > p2) {
             [p1, p2] = [p2, p1];
@@ -45,7 +45,7 @@ export const crossoverMethod: { [K in CrossoverMethodName]: CrossoverFunction<an
         const aliceChromoLength = alice.getGenes().length;
 
         for (let i = 0; i < aliceChromoLength; i++) {
-            let swap = Math.random() < 0.5;
+            let swap = alice.randomNumber() < 0.5;
             b1.push(swap ? bobsGenes[i] : alicesGenes[i]);
             b2.push(swap ? alicesGenes[i] : bobsGenes[i]);
         }
@@ -75,7 +75,7 @@ export const crossoverMethod: { [K in CrossoverMethodName]: CrossoverFunction<an
         b2 = bobsGenes.slice();
 
         for (let i = 0; i < N / 2; i++) {
-            let idx = Math.floor(Math.random() * diffBits.length);
+            let idx = Math.floor(alice.randomNumber() * diffBits.length);
             b1[diffBits[idx]] = bobsGenes[diffBits[idx]];
             b2[diffBits[idx]] = alicesGenes[diffBits[idx]];
             diffBits.splice(idx, 1);
@@ -92,8 +92,8 @@ export const crossoverMethod: { [K in CrossoverMethodName]: CrossoverFunction<an
         const bobsGenes = bob.getGenes();
         const aliceChromoLength = alice.getGenes().length;
 
-        let inf = Math.floor(Math.random() * aliceChromoLength);
-        let sup = Math.floor(Math.random() * aliceChromoLength);
+        let inf = Math.floor(alice.randomNumber() * aliceChromoLength);
+        let sup = Math.floor(alice.randomNumber() * aliceChromoLength);
         let tmp = inf;
 
         inf = Math.min(inf, sup);

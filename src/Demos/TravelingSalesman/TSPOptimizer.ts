@@ -26,7 +26,7 @@ export class TSPOptimizer {
         this.genetics = new Darwin<number>({
             populationSize: 500,
             chromosomeLength: this.CITY_COUNT,
-            randGene: (() => {
+            randomGene: (() => {
                 if (this.shuffled.length === 0) {
                     this.shuffled = shuffle(this.model);
                 }
