@@ -6,10 +6,10 @@
   "version": "1.2.0",
   "description": "Flexible Genetic Algorithm Library",
   "scripts": {
-    "start": "webpack serve --mode development",
-    "build": "tsc && webpack --mode production",
-    "debug": "webpack --mode development",
-    "watch": "webpack -w"
+    "lib": "tsc",
+    "umd": "webpack --mode production",
+    "demos": "webpack --config demos.config.js --mode production",
+    "prepublishOnly": "rm -rf /lib && npm run lib"
   },
   "repository": {
     "type": "git",
@@ -27,8 +27,7 @@
     "ts-loader": "^8.1.0",
     "typescript": "^4.2.4",
     "webpack": "^5.31.2",
-    "webpack-cli": "^4.6.0",
-    "webpack-dev-server": "^3.11.2"
+    "webpack-cli": "^4.6.0"
   },
   "author": "Nathan Soufflet",
   "license": "MIT",

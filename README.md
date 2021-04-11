@@ -1,3 +1,6 @@
+[![NPM Package][npm]][npm-url]
+[![Build Size][build-size]][build-size-url]
+
 # Darwin
 
 Flexible genetic algorithm implementation in TypeScript.
@@ -61,3 +64,8 @@ To observe the evolution of the population, one can call:
   const avg = population.getAverageFitness();
   const max = population.getFittest().getFitness();
 ```
+
+[npm]: https://img.shields.io/npm/v/charles.darwin
+[npm-url]: https://www.npmjs.com/package/charles.darwin
+[build-size]: https://badgen.net/bundlephobia/minzip/charles.darwin
+[build-size-url]: https://bundlephobia.com/result?p=charles.darwin
