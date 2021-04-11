@@ -1,6 +1,6 @@
 import { CrossoverFunction, crossoverMethod } from "../../CrossoverMethods";
 import { Darwin } from "../../Darwin";
-import { Eater } from "./Eater";
+import { createEater, Eater } from "./Eater";
 import { NeuralNet } from "./NeuralNet";
 import { Vector2D } from "./Vector2D";
 import { MathUtils } from "./MathUtils";
@@ -81,7 +81,7 @@ export class SmartEaters {
 
         // Associate each chromosome to a Eater
         this.population = this.genetics.getPopulation().map((_, idx) =>
-            new Eater(this.randomPos(), Math.random() * MathUtils.TWO_PI, idx)
+            createEater(this.randomPos(), Math.random() * MathUtils.TWO_PI, idx)
         );
 
         this.cnv.addEventListener('click', (e: MouseEvent) => {
@@ -91,7 +91,7 @@ export class SmartEaters {
             let closestEaterDist = Infinity;
 
             for (let i = 0; i < this.population.length; i++) {
-                const distSq = this.population[i].getPosition().distSq(mousePos);
+                const distSq = this.population[i].position.distSq(mousePos);
                 if (distSq < closestEaterDist) {
                     closestEaterDist = distSq;
                     closestEaterIdx = i;
@@ -125,7 +125,7 @@ export class SmartEaters {
         let closestDistSq = Infinity;
 
         for (let i = 0; i < this.food.length; i++) {
-            const dist = eater.getPosition().distSq(this.food[i]);
+            const dist = eater.position.distSq(this.food[i]);
             if (dist < closestDistSq) {
                 closestDistSq = dist;
                 closestIndex = i;
@@ -147,7 +147,7 @@ export class SmartEaters {
 
             // Update positions
             for (const eater of this.population) {
-                const chromo = this.genetics.getChromosomeAt(eater.getChromosomeIdx());
+                const chromo = this.genetics.getChromosomeAt(eater.getChromosomeIndex());
                 this.brain.putWeights(this.layerSizes, chromo.getGenes());
 
                 const closestFood = this.getClosestFood(eater);
@@ -155,7 +155,7 @@ export class SmartEaters {
 
                 // food dir
                 const [foodLeft, foodRight] = this.food[closestFood.index]
-                    .sub(eater.getPosition())
+                    .sub(eater.position)
                     .normalize()
                     .toArray();
 
@@ -168,8 +168,8 @@ export class SmartEaters {
 
                 // lookat
                 const lookat = [
-                    Math.cos(eater.getAngle()),
-                    Math.sin(eater.getAngle())
+                    Math.cos(eater.angle),
+                    Math.sin(eater.angle)
                 ];
 
                 const [turnLeft, turnRight] = this.brain.run(...lookat, foodLeft, foodRight);
@@ -180,13 +180,13 @@ export class SmartEaters {
                     this.params.maxTurnRate
                 );
 
-                eater.setAngle(eater.getAngle() + rotationForce);
+                eater.angle += rotationForce;
                 eater.lookat = new Vector2D(lookat[0], lookat[1]);
                 eater.foodDir = new Vector2D(foodLeft, foodRight);
 
-                eater.getPosition().plus(eater.lookat.times(this.params.maxSpeed * DPR));
+                eater.position.plus(eater.lookat.times(this.params.maxSpeed * DPR));
 
-                const pos = eater.getPosition();
+                const pos = eater.position;
 
                 if (this.params.wrapBorders) {
                     if (pos.x > this.cnv.width) pos.x = 0;
@@ -220,7 +220,7 @@ export class SmartEaters {
             this.spawnFood();
 
             for (const eater of this.population) {
-                eater.setPosition(this.randomPos());
+                eater.position = this.randomPos();
             }
 
             this.selectedIndex = -1;
@@ -277,7 +277,7 @@ export class SmartEaters {
             this.ctx.strokeStyle = 'red';
             this.ctx.beginPath();
             const eater = this.population[this.selectedIndex];
-            const pos = eater.getPosition();
+            const pos = eater.position;
             this.ctx.arc(pos.x / DPR, pos.y / DPR, this.params.eaterSize * 2, 0, MathUtils.TWO_PI);
             this.ctx.stroke();
             this.ctx.closePath();
@@ -303,14 +303,14 @@ export class SmartEaters {
                 this.ctx.beginPath();
                 this.ctx.lineWidth = 1;
                 this.ctx.strokeStyle = 'black';
-                this.ctx.moveTo(eater.getPosition().x / DPR, eater.getPosition().y / DPR);
-                const food = eater.getPosition().add(eater.foodDir.times(eater.getPosition().dist(eater.closestFood)));
+                this.ctx.moveTo(eater.position.x / DPR, eater.position.y / DPR);
+                const food = eater.position.add(eater.foodDir.times(eater.position.dist(eater.closestFood)));
                 this.ctx.lineTo(food.x / DPR, food.y / DPR);
                 this.ctx.stroke();
             }
 
             if (!(this.hideNonSelected && this.selectedIndex !== undefined && i++ !== this.selectedIndex)) {
-                const fitness = Math.log2(this.genetics.getChromosomeAt(eater.getChromosomeIdx()).getFitness());
+                const fitness = Math.log2(this.genetics.getChromosomeAt(eater.getChromosomeIndex()).getFitness());
 
                 const [r, g, b] = [
                     MathUtils.clamp(MathUtils.map(fitness, 0, max, c1[0], c2[0]), Math.min(c1[0], c2[0]), Math.max(c1[0], c2[0])),
@@ -326,13 +326,13 @@ export class SmartEaters {
                 )`;
 
                 this.ctx.beginPath();
-                const la = eater.lookat.times(this.params.eaterSize * DPR).add(eater.getPosition());
-                const alpha = la.sub(eater.getPosition()).angle();
+                const la = eater.lookat.times(this.params.eaterSize * DPR).add(eater.position);
+                const alpha = la.sub(eater.position).angle();
                 const beta = Math.PI / 1.3;
                 const u = new Vector2D(Math.cos(alpha + beta), Math.sin(alpha + beta));
                 const v = new Vector2D(Math.cos(alpha - beta), Math.sin(alpha - beta));
-                const p1 = eater.getPosition().add(u.times(this.params.eaterSize * DPR));
-                const p2 = eater.getPosition().add(v.times(this.params.eaterSize * DPR));
+                const p1 = eater.position.add(u.times(this.params.eaterSize * DPR));
+                const p2 = eater.position.add(v.times(this.params.eaterSize * DPR));
                 this.ctx.moveTo(p1.x / DPR, p1.y / DPR);
                 this.ctx.lineTo(la.x / DPR, la.y / DPR);
                 this.ctx.lineTo(p2.x / DPR, p2.y / DPR);

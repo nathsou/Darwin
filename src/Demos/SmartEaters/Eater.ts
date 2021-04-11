@@ -1,37 +1,15 @@
 import { Vector2D } from "./Vector2D";
-import { MathUtils } from "./MathUtils";
 
-export class Eater {
-    public closestFood: Vector2D;
-    public foodDir: Vector2D;
-    public lookat: Vector2D;
-    private pos: Vector2D;
-    private angle: number;
-    private chromosomeIdx: number;
+export type Eater = ReturnType<typeof createEater>;
 
-    constructor(pos: Vector2D, angle: number, chromosomeIdx: number) {
-        this.pos = pos;
-        this.angle = angle;
-        this.chromosomeIdx = chromosomeIdx;
-    }
+export const createEater = (position: Vector2D, angle: number, chromosomeIndex: number) => {
+    let closestFood = new Vector2D(0, 0);
+    let foodDir = new Vector2D(0, 0);
+    let lookat = new Vector2D(0, 0);
 
-    public getChromosomeIdx(): number {
-        return this.chromosomeIdx;
-    }
-
-    public getPosition(): Vector2D {
-        return this.pos;
-    }
-
-    public setPosition(newPosition: Vector2D) {
-        this.pos = newPosition;
-    }
-
-    public getAngle(): number {
-        return this.angle;
-    }
-
-    public setAngle(angle: number) {
-        this.angle = angle % MathUtils.TWO_PI;
-    }
-}
+    return {
+        closestFood, foodDir, lookat,
+        position, angle,
+        getChromosomeIndex: () => chromosomeIndex
+    };
+};
