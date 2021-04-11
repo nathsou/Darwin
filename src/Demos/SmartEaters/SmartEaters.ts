@@ -1,7 +1,7 @@
 import { CrossoverFunction, crossoverMethod } from "../../CrossoverMethods";
 import { Darwin } from "../../Darwin";
 import { Eater } from "./Eater";
-import { NeuralNet, NeuralNetFunction } from "./NeuralNet";
+import { NeuralNet } from "./NeuralNet";
 import { Vector2D } from "./Vector2D";
 import { MathUtils } from "./MathUtils";
 
@@ -364,29 +364,12 @@ export class SmartEaters {
         return this.population[idx];
     }
 
-    public getEaterBrain(idx: number): NeuralNetFunction {
-        return NeuralNet.
-            fromWeights(
-                this.layerSizes,
-                this.genetics.getChromosomeAt(
-                    this.population[idx].getChromosomeIdx()
-                ).getGenes()
-            ).toFunction();
-    }
-
     public toggleFastMode(): void {
         this.fastMode = !this.fastMode;
     }
 
     public getDarwinInstance(): Darwin<number> {
         return this.genetics;
-    }
-
-    public getFittestBrain(): NeuralNetFunction {
-        return NeuralNet.fromWeights(
-            this.layerSizes,
-            this.genetics.getFittest().getGenes()
-        ).toFunction();
     }
 
     public toggleMating(): void {

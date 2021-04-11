@@ -1,9 +1,4 @@
 
-export interface NeuralNetFunction {
-    args: string[],
-    body: string
-}
-
 // minified version, only implements feedforwarding
 export class NeuralNet {
     private weightsAndBiases: number[] = [];
@@ -60,25 +55,25 @@ export class NeuralNet {
         }
     }
 
-    public putWeights(num_neurons_per_layer: number[], weights_and_biases: number[]): void {
-        this.numNeuronsPerLayer = num_neurons_per_layer;
+    public putWeights(numNeuronsPerLayer: number[], weightsAndBiases: number[]): void {
+        this.numNeuronsPerLayer = numNeuronsPerLayer;
         this.computeOffsets();
 
-        const N = NeuralNet.weightsCount(num_neurons_per_layer);
+        const n = NeuralNet.weightsCount(numNeuronsPerLayer);
 
-        if (N !== weights_and_biases.length) {
-            throw new Error(`The number of weights do not match the given architecture, expected ${N}, got ${weights_and_biases.length}.`);
+        if (n !== weightsAndBiases.length) {
+            throw new Error(`The number of weights do not match the given architecture, expected ${n}, got ${weightsAndBiases.length}.`);
         }
 
-        this.weightsAndBiases = weights_and_biases;
+        this.weightsAndBiases = weightsAndBiases;
     }
 
     //returns the number of weights (biases included) for a given architecture
-    static weightsCount(num_neurons_per_layer: number[]): number {
+    static weightsCount(numNeuronsPerLayer: number[]): number {
         let count = 0;
 
-        for (let l = 1; l < num_neurons_per_layer.length; l++) {
-            count += num_neurons_per_layer[l] * (num_neurons_per_layer[l - 1] + 1);
+        for (let l = 1; l < numNeuronsPerLayer.length; l++) {
+            count += numNeuronsPerLayer[l] * (numNeuronsPerLayer[l - 1] + 1);
         }
 
         return count;
@@ -92,45 +87,17 @@ export class NeuralNet {
 
     }
 
-    // this is bad!
-    public toFunction(): NeuralNetFunction {
-        return {
-            args: ['inputs'],
-            body: `
-            var json = ${JSON.stringify(this.toJSON())};
+    static fromJSON(json: { weightsAndbiases: number[], layers: number[] }): NeuralNet {
+        const nn = new NeuralNet();
+        nn.putWeights(json.layers, json.weightsAndbiases);
 
-            if (inputs.length !== json.layers[0])
-                throw new Error('Expected ' + json.layers[0] + ' inputs, got ' + inputs.length + '.');
-
-            var offsets = ${JSON.stringify(this.offsets)}, a = inputs, output;
-
-            for (var l = 1; l < json.layers.length; l++) {
-                output = [];
-                for (var j = 0; j < json.layers[l]; j++) {
-                    var z = json.weights_and_biases[offsets[l - 1] + j * (json.layers[l - 1] + 1)]; 
-                    for (var k = 0; k < json.layers[l - 1]; k++)
-                        z += json.weights_and_biases[offsets[l - 1] + j * (json.layers[l - 1] + 1) + k + 1] * a[k];
-                    output[j] = 1 / (1 + Math.exp(-z));
-                }
-                a = output;
-            }
-
-            return output;
-        `
-        };
+        return nn;
     }
 
-    static fromJSON(json: { weights_and_biases: number[], layers: number[] }): NeuralNet {
-        const NN = new NeuralNet();
-        NN.putWeights(json.layers, json.weights_and_biases);
+    static fromWeights(numNeuronsPerLayer: number[], weightsAndBiases: number[]): NeuralNet {
+        const nn = new NeuralNet();
+        nn.putWeights(numNeuronsPerLayer, weightsAndBiases);
 
-        return NN;
-    }
-
-    static fromWeights(num_neurons_per_layer: number[], weights_and_biases: number[]): NeuralNet {
-        const NN = new NeuralNet();
-        NN.putWeights(num_neurons_per_layer, weights_and_biases);
-
-        return NN;
+        return nn;
     }
 }

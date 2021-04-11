@@ -81,36 +81,8 @@ const smartEatersDemo = {
     ]
 };
 
-const smartEatersAnalysis = {
-    entry: path.resolve(__dirname, '/src/Demos/SmartEaters/AnalysisMain.ts'),
-    module: {
-        rules: [{
-            test: /\.ts$/,
-            use: 'ts-loader',
-            exclude: [
-                /node_modules/,
-            ]
-        }]
-    },
-    resolve: {
-        extensions: ['.ts', '.js']
-    },
-
-    output: {
-        filename: 'analysis.js',
-        path: path.join(dist, 'SmartEaters')
-    },
-    plugins: [
-        new HtmlWebpackPlugin({
-            filename: 'analysis.html',
-            title: 'Eater Analysis'
-        })
-    ]
-};
-
 module.exports = [
     typingMonkeysDemo,
     tspDemo,
-    smartEatersDemo,
-    smartEatersAnalysis
+    smartEatersDemo
 ];

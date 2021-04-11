@@ -12,8 +12,9 @@ cnv.style.height = `${window.innerHeight}px`;
 
 ctx?.scale(DPR, DPR);
 
-document.body.style.padding = '0';
 document.body.style.margin = '0';
+document.body.style.overflow = 'hidden';
+
 document.body.appendChild(cnv);
 
 const eaters = new SmartEaters(cnv, {
@@ -64,20 +65,6 @@ window.addEventListener('keypress', e => {
 
         case 'h': // hide all eaters but the selected one
             eaters.hideNonSelected = !eaters.hideNonSelected;
-            break;
-
-        case 'a': // isolate the selected eater
-            if (eaters.getSelectedIndex()) {
-                const brain = eaters.getEaterBrain(eaters.getSelectedIndex());
-                const b = window.URL.createObjectURL(new Blob([`
-                {
-                    'params': ${JSON.stringify(eaters.getParameters())},
-                    'brain': ${JSON.stringify(brain)}
-                }
-                `]));
-
-                window.open(`analysis.html?b=${b}`);
-            }
             break;
 
         default:

@@ -68,8 +68,8 @@ export class Vector2D {
         return [this.x, this.y];
     }
 
-    public fromArray(arr: number[]): Vector2D {
-        return new Vector2D(arr[0], arr[1]);
+    public fromTuple([x, y]: [x: number, y: number]): Vector2D {
+        return new Vector2D(x, y);
     }
 
     static fill(n: number): Vector2D {
@@ -84,8 +84,8 @@ export class Vector2D {
         return Vector2D.fill(1);
     }
 
-    static rand(): Vector2D {
-        return new Vector2D(Math.random(), Math.random());
+    static rand(randFn: () => number = Math.random): Vector2D {
+        return new Vector2D(randFn(), randFn());
     }
 
     static clone(v: Vector2D): Vector2D {

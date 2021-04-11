@@ -42,7 +42,7 @@ On the other hand, the 'Smart Eaters' demo evolves the weights and biases of an 
   });
 ```
 
-The constructor of the Darwin class initializes a population of random chromosomes, we can now assign a score (or fitness) to each of those chromosomes based on their genes represented by an array of the type returned by the randGene function :
+The constructor of the Darwin class initializes a population of random chromosomes, we can now assign a score (or fitness) to each of those chromosomes based on their genes represented by an array of the type returned by the randomGene function :
 
 ```typescript
   for (const chromo of population.getPopulation()) {
