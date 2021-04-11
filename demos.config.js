@@ -3,7 +3,7 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 const dist = path.resolve(__dirname, 'dist');
 
 const typingMonkeysDemo = {
-    entry: path.resolve(__dirname, 'src/Demos/typingMonkeys/Main.ts'),
+    entry: path.resolve(__dirname, 'src/Demos/TypingMonkeys/Main.ts'),
     module: {
         rules: [{
             test: /\.ts$/,
