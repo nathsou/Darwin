@@ -6,7 +6,7 @@
   "version": "1.2.0",
   "description": "Flexible Genetic Algorithm Library",
   "scripts": {
-    "start": "webpack-dev-server --mode development -d",
+    "start": "webpack serve --mode development",
     "build": "tsc && webpack --mode production",
     "debug": "webpack --mode development",
     "watch": "webpack -w"
