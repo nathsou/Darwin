@@ -1,4 +1,4 @@
-import { CrossoverMethod } from '../../CrossoverMethods';
+import { crossoverMethod } from '../../CrossoverMethods';
 import { SmartEaters, DPR } from './SmartEaters';
 
 const cnv = document.createElement('canvas');
@@ -22,7 +22,7 @@ const eaters = new SmartEaters(cnv, {
     ticksPerGen: 2000,
     populationSize: 100,
     foodCount: 120,
-    crossoverMethod: CrossoverMethod.twoPoint,
+    crossoverMethod: crossoverMethod.twoPoint,
     wrapBorders: true,
     mutationRate: 0.02,
     hiddenLayersSizes: [8]

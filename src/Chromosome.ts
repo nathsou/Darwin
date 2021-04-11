@@ -1,6 +1,6 @@
 import { CrossoverFunction } from "./CrossoverMethods";
 import EventEmitter from "./EventEmitter";
-import { CustomMutationMethod, MutationMethod } from "./MutationMethod";
+import { MutationFunction } from "./MutationMethod";
 
 export type Offspring<T> = [baby1: T[], baby2: T[]];
 
@@ -47,51 +47,19 @@ export class Chromosome<T> extends EventEmitter<'update_fitness'> {
         return count;
     }
 
-    private mutateFlip(mutationRate: number): void {
-        for (let i = 0; i < this.length; i++) {
-            if (Math.random() < mutationRate) {
-                this.genes[i] = this.randGene();
-            }
-        }
+    public mutateWith(mutationRate = 1 / this.length, mutateFn: MutationFunction<T>): void {
+        mutateFn(this, mutationRate);
     }
 
-    private mutateSwap(mutationRate: number): void {
-        for (let i = 0; i < this.length; i++) {
-            if (Math.random() < mutationRate) {
-                const j = Math.floor(Math.random() * this.length);
-                const tmp = this.genes[i];
-
-                this.genes[i] = this.genes[j];
-                this.genes[j] = tmp;
-            }
-        }
-    }
-
-    public mutate(mutationRate = 1 / this.length, method: MutationMethod | CustomMutationMethod<T>): void {
-        if (typeof method === 'number') {
-            switch (method) {
-                case MutationMethod.FLIP:
-                    this.mutateFlip(mutationRate);
-                    break;
-
-                case MutationMethod.SWAP:
-                    this.mutateSwap(mutationRate);
-                    break;
-            }
-        } else {
-            this.setGenes((method as CustomMutationMethod<T>)(this.getGenes()));
-        }
-    }
-
-    public crossoverWith(bob: Chromosome<T>, method: CrossoverFunction<T>): Offspring<T> {
-        return method(this, bob);
+    public crossoverWith(bob: Chromosome<T>, crossoverFn: CrossoverFunction<T>): Offspring<T> {
+        return crossoverFn(this, bob);
     }
 
     public setGenes(genes: T[]): void {
-        this.genes = [...genes];
+        this.genes = genes;
     }
 
-    public getGenes(): Readonly<T>[] {
+    public getGenes(): T[] {
         return this.genes;
     }
 
@@ -106,5 +74,9 @@ export class Chromosome<T> extends EventEmitter<'update_fitness'> {
         const clone = Chromosome.generate(this.length, this.randGene);
         clone.copy(this);
         return clone;
+    }
+
+    public randomGene(): T {
+        return this.randGene();
     }
 }

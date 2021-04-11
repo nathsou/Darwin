@@ -4,7 +4,7 @@ export type CrossoverFunction<T> = (alice: Chromosome<T>, bob: Chromosome<T>) =>
 
 type CrossoverMethodName = 'singlePoint' | 'twoPoint' | 'uniform' | 'halfUniform' | 'ordered';
 
-export const CrossoverMethod: { [K in CrossoverMethodName]: CrossoverFunction<any> } = {
+export const crossoverMethod: { [K in CrossoverMethodName]: CrossoverFunction<any> } = {
     singlePoint: <T>(alice: Chromosome<T>, bob: Chromosome<T>): Offspring<T> => {
         const p = Math.floor(Math.random() * alice.getGenes().length);
         const b1 = [...alice.getGenes().slice(0, p), ...bob.getGenes().slice(p)];

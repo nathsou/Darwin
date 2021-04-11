@@ -1,7 +1,7 @@
 import { Darwin } from "../../Darwin";
-import { MutationMethod } from "../../MutationMethod";
+import { mutationMethod } from "../../MutationMethod";
 import { Point, TSP } from "./TSP";
-import { CrossoverMethod } from "../../CrossoverMethods";
+import { crossoverMethod } from "../../CrossoverMethods";
 import { shuffle } from "./Utils";
 
 export class TSPOptimizer {
@@ -32,8 +32,8 @@ export class TSPOptimizer {
                 }
                 return this.shuffled.pop();
             }).bind(this),
-            crossoverMethod: CrossoverMethod.ordered,
-            mutationMethod: MutationMethod.SWAP,
+            crossoverMethod: crossoverMethod.ordered,
+            mutationMethod: mutationMethod.swap,
             eliteCount: 5
         });
 

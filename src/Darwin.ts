@@ -1,6 +1,6 @@
 import { Chromosome } from "./Chromosome";
-import { CrossoverMethod, CrossoverFunction } from "./CrossoverMethods";
-import { CustomMutationMethod, MutationMethod } from "./MutationMethod";
+import { crossoverMethod, CrossoverFunction } from "./CrossoverMethods";
+import { MutationFunction, mutationMethod } from "./MutationMethod";
 import { selectKBest } from "./Utils";
 
 export interface DarwinParams<T> {
@@ -10,7 +10,7 @@ export interface DarwinParams<T> {
     crossoverRate?: number,
     mutationRate?: number,
     crossoverMethod?: CrossoverFunction<T>,
-    mutationMethod?: MutationMethod | CustomMutationMethod<T>,
+    mutationMethod?: MutationFunction<T>,
     eliteCount?: number,
     eliteCopies?: number
 }
@@ -43,8 +43,8 @@ export class Darwin<T> {
         this.params = {
             crossoverRate: 0.7,
             mutationRate: 1 / params.populationSize,
-            crossoverMethod: CrossoverMethod.singlePoint,
-            mutationMethod: MutationMethod.FLIP,
+            crossoverMethod: crossoverMethod.singlePoint,
+            mutationMethod: mutationMethod.flip,
             eliteCount: Math.ceil(params.populationSize / 25),
             eliteCopies: 1,
             ...params
@@ -104,7 +104,7 @@ export class Darwin<T> {
 
     private mutate(newPopulation: Array<Chromosome<T>>): void {
         for (const c of newPopulation) {
-            c.mutate(this.params.mutationRate, this.params.mutationMethod);
+            c.mutateWith(this.params.mutationRate, this.params.mutationMethod);
             // c.setFitness(0); // reset fitness
         }
     }
