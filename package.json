@@ -1,5 +1,6 @@
 {
   "name": "charles.darwin",
+  "main": "lib/js/Darwin.js",
   "module": "lib/js/Darwin.js",
   "types": "lib/types/Darwin.d.ts",
   "version": "1.2.0",
