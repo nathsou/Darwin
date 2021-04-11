@@ -38,7 +38,7 @@ On the other hand, the 'Smart Eaters' demo evolves the weights and biases of an 
     mutationMethod?: MutationFunction<T> = mutationMethod.flip,
     eliteCount?: number = Math.ceil(populationSize / 25),
     eliteCopies?: number = 1,
-    randomNumber: () => number = Math.random
+    randomNumber?: () => number = Math.random
   });
 ```
 
