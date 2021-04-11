@@ -41,7 +41,7 @@ export class TSPOptimizer {
         const rectHeight = cities.reduce((a: number, b: Point) => a > b.y ? a : b.y, 0);
 
         this.fitnessFactor *= avgRectDist(rectWidth, rectHeight) * this.CITY_COUNT;
-        this.bestPath = this.genetics.getFittest().getGenes();
+        this.bestPath = this.genetics.updateStats().fittest.getGenes();
     }
 
     private pathFitness(path: number[]): number {
@@ -63,7 +63,7 @@ export class TSPOptimizer {
 
         while (this.genetics.getGeneration() !== this.maxGenerations && count !== this.convergenceThreshold) {
             this.newGen();
-            const fittest = this.genetics.getFittest();
+            const { fittest } = this.genetics.updateStats();
 
             // this.distanceFromFitness(fittest.getFitness());
             const dist = this.tsp.distanceSquared(fittest.getGenes());
@@ -87,7 +87,7 @@ export class TSPOptimizer {
 
         ctx.fillStyle = 'black';
         ctx.fillText(`generation : ${this.genetics.getGeneration()}`, 5, 15);
-        ctx.fillText(`avg dist : ${this.distanceFromFitness(this.genetics.getAverageFitness()).toFixed(0)}`, 5, 30);
+        ctx.fillText(`avg dist : ${this.distanceFromFitness(this.genetics.getStats().averageFitness).toFixed(0)}`, 5, 30);
     }
 
     public getGeneration(): number {

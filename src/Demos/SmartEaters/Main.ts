@@ -54,9 +54,7 @@ window.addEventListener('keypress', e => {
             break;
 
         case 'm': // increment fresh rate
-            eaters.fastModeRefreshRate -= 2;
-            if (eaters.fastModeRefreshRate < 1)
-                eaters.fastModeRefreshRate = 1;
+            eaters.fastModeRefreshRate = Math.max(eaters.fastModeRefreshRate - 2, 1);
             break;
 
         case 'l': // draw lines to the nearest food for each eater

@@ -51,7 +51,7 @@ export class MonkeyFactory {
                 if (d === 0) {
                     return {
                         generation: population.getGeneration(),
-                        averageFitness: population.getAverageFitness(),
+                        averageFitness: population.getStats().averageFitness,
                         fittest: bob
                     };
                 }
@@ -60,9 +60,11 @@ export class MonkeyFactory {
             // mating time!
             population.mate();
 
+            const { averageFitness, fittest } = population.getStats();
+
             yield {
-                averageFitness: population.getAverageFitness(),
-                fittest: population.getFittest(),
+                averageFitness,
+                fittest,
                 generation: population.getGeneration()
             };
         }

@@ -38,6 +38,7 @@ export class SmartEaters {
     private paused = false;
     private fastMode = false;
     public fastModeRefreshRate = 2;
+    public statsRefreshRate = 20;
     public showLines = false;
     public hideNonSelected = false;
     public stopMating = false;
@@ -211,6 +212,7 @@ export class SmartEaters {
     private nextGeneration(): void {
         if (!this.stopMating) {
             this.genetics.mate();
+            this.genetics.updateStats();
 
             // reset fitness
             for (const eater of this.genetics.getPopulation()) {
@@ -245,7 +247,9 @@ export class SmartEaters {
 
     private render(): void {
         if (!this.fastMode || this.ticks % this.fastModeRefreshRate === 0) {
-            this.genetics.updateStats(true);
+            if (this.ticks % this.statsRefreshRate === 0) {
+                this.genetics.updateStats(true);
+            }
 
             this.ctx.clearRect(0, 0, this.cnv.width, this.cnv.height);
             this.drawFood();
@@ -256,13 +260,14 @@ export class SmartEaters {
     }
 
     private drawGenerationInfo(): void {
-        const best = this.genetics.getFittest().getFitness() !== 0
-            ? Math.log2(this.genetics.getFittest().getFitness())
+        const { fittest } = this.genetics.getStats();
+        const best = fittest.getFitness() !== 0
+            ? Math.log2(fittest.getFitness())
             : 0;
 
         this.ctx.fillStyle = 'black';
         this.ctx.fillText(`Generation: ${this.genetics.getGeneration()}`, 5, 10);
-        this.ctx.fillText(`avg: ${Math.log2(1 + this.genetics.getAverageFitness()).toFixed(3)}`, 5, 25);
+        this.ctx.fillText(`avg: ${Math.log2(1 + this.genetics.getStats().averageFitness).toFixed(3)}`, 5, 25);
         this.ctx.fillText(`best: ${best}`, 5, 40);
         this.ctx.fillText(`ticks: ${this.ticks} / ${this.params.ticksPerGen}`, 5, 55);
     }
@@ -295,7 +300,7 @@ export class SmartEaters {
         const c1 = [46, 204, 113];
         const c2 = [255, 0, 0];
 
-        const max = Math.log2(this.genetics.getFittest().getFitness());
+        const max = Math.log2(this.genetics.getStats().fittest.getFitness());
         let i = 0;
 
         for (const eater of this.population) {

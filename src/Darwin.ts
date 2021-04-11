@@ -20,21 +20,22 @@ export interface DarwinStats<T> {
     fittest: Chromosome<T>,
     fittestIndex: number,
     averageFitness: number,
-    totalFitness: number,
-    needsUpdate: boolean
+    totalFitness: number
 }
 
+/**
+ * a function to evaluate the fitness of a given chromosome
+ */
 export type FitnessEvaluator<T> = (chromo: Readonly<T>[]) => number;
 
 export class Darwin<T> {
     private population: Array<Chromosome<T>> = [];
     private stats: DarwinStats<T>;
+    private statsNeedUpdate = true;
     private generation = 0;
     private params: Required<DarwinParams<T>>;
 
     constructor(params: DarwinParams<T>) {
-        const onFitnessUpdate = () => { this.stats.needsUpdate = true; };
-
         this.params = {
             crossoverRate: 0.7,
             mutationRate: 1 / params.populationSize,
@@ -60,8 +61,7 @@ export class Darwin<T> {
             fittest: this.population[0],
             averageFitness: 0,
             totalFitness: 0,
-            fittestIndex: 0,
-            needsUpdate: true
+            fittestIndex: 0
         };
     }
 
@@ -128,14 +128,12 @@ export class Darwin<T> {
             const chromo = this.population[i];
             chromo.setFitness(fitnessEvaluator(chromo.getGenes()));
         }
-
-        this.stats.needsUpdate = true;
     }
 
     /**
      * generates a new generation
-     * the fitness of each Chromosome must be updated before calling mate
-     * using setFitness or updateFitness
+     * the fitness of each chromosome must be updated before calling this function
+     * using `setFitness` on each chromosome or `updateFitness`
      */
     public mate(): void {
         const newPopulation: Array<Chromosome<T>> = [];
@@ -150,19 +148,27 @@ export class Darwin<T> {
         // uptate the population
         this.population = newPopulation;
         this.generation += 1;
-        this.updateStats(true);
+        this.statsNeedUpdate = true;
     }
 
-    // Getters & Setters
+    /**
+     * @returns the entire population
+     */
     public getPopulation(): Readonly<Array<Chromosome<T>>> {
         return this.population;
     }
 
+    /**
+     * @returns the chromosome at index `index`
+     */
     public getChromosomeAt(index: number): Chromosome<T> {
         return this.population[index];
     }
 
-    // probability of being selected proportional to fitness
+    /**
+     * @returns a random chromosome from the population
+     * where the probability of being selected is proportional to the fitness
+     */
     public getRandomChromosome(): Chromosome<T> {
         this.updateStats();
 
@@ -186,34 +192,43 @@ export class Darwin<T> {
         return this.population[0];
     }
 
+    /**
+     * efficiently computes the `count` best chromosomes
+     * in the population based on their fitness
+     */
     public getTopChromosomes(count: number): Readonly<Array<Chromosome<T>>> {
         return selectKBest(this.population, count);
     }
 
-    public getAverageFitness(): Readonly<number> {
-        this.updateStats();
-        return this.stats.averageFitness;
-    }
-
-    public getFittest(): Chromosome<T> {
-        this.updateStats();
-        return this.stats.fittest;
-    }
-
+    /**
+     * @returns the parameters used to construct this Darwin instance
+     */
     public getParams(): Readonly<DarwinParams<T>> {
         return this.params;
     }
 
+    /**
+     * @returns the current generation
+     */
     public getGeneration(): Readonly<number> {
         return this.generation;
     }
 
+    /**
+     * returns the latest statistics,
+     * to compute an updated version call `updateStats`
+     */
     public getStats(): Readonly<DarwinStats<T>> {
         return this.stats;
     }
 
-    public updateStats(forceUpdate = true): void {
-        if (forceUpdate || this.stats.needsUpdate) {
+    /**
+     * update the statistics for this generation
+     * if forceUpdate is true, update even if `mate`
+     * has not been called
+     */
+    public updateStats(forceUpdate = false): Readonly<DarwinStats<T>> {
+        if (forceUpdate || this.statsNeedUpdate) {
             let totalFitness = 0;
             let maxFitness = 0;
             let fittestIndex = 0;
@@ -232,7 +247,9 @@ export class Darwin<T> {
             this.stats.averageFitness = totalFitness / this.params.populationSize;
             this.stats.fittest = this.population[fittestIndex].clone();
             this.stats.fittestIndex = fittestIndex;
-            this.stats.needsUpdate = false;
+            this.statsNeedUpdate = false;
         }
+
+        return this.stats;
     }
 }

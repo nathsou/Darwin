@@ -17,8 +17,8 @@ cnv.style.height = `${window.innerHeight}px`;
 
 ctx.scale(dpr, dpr);
 
-document.body.style.padding = '0';
 document.body.style.margin = '0';
+document.body.style.overflow = 'hidden';
 document.body.appendChild(cnv);
 
 const cities = [];
