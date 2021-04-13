@@ -110,8 +110,8 @@ const deblurDemo = {
 };
 
 module.exports = [
-    // typingMonkeysDemo,
-    // tspDemo,
-    // smartEatersDemo,
+    typingMonkeysDemo,
+    tspDemo,
+    smartEatersDemo,
     deblurDemo
 ];
