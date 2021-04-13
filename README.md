@@ -18,6 +18,7 @@ Darwin is compatible with ES6 modules
 - [Smart Eaters](https://nathsou.github.io/Darwin/SmartEaters/) inspired by [Mat Buckland](http://www.ai-junkie.com/ann/evolved/nnt1.html)
 - [Typing Monkeys](https://nathsou.github.io/Darwin/TypingMonkeys/) inspired by [Daniel Shiffman](http://natureofcode.com/book/chapter-9-the-evolution-of-code/)
 - [Traveling Salesman](https://nathsou.github.io/Darwin/TSP/)
+- [Text Deblurring](https://nathsou.github.io/Darwin/DeblurText/)
 
 ## Usage
 

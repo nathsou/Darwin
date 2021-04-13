@@ -41,7 +41,9 @@ const setup = () => {
     });
 
     const best = h('p', {
-        textContent: 'best: '
+        textContent: 'best: ',
+    }, {
+        fontSize: '24px'
     });
 
     const onTick = () => {

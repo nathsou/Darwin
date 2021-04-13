@@ -82,9 +82,9 @@ export class Deblurrer {
             randomGene: randChar,
             chromosomeLength: this.params.target.length,
             mutationMethod: mutationMethod.flip,
-            crossoverMethod: crossoverMethod.uniform,
+            crossoverMethod: crossoverMethod.twoPoint,
             mutationRate: 0.1,
-            crossoverRate: 0.95
+            crossoverRate: 0.9
         };
 
         return this.darwinParams;
