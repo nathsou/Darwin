@@ -67,7 +67,7 @@ To observe the evolution of the population, one can call:
     fittestIndex,
     averageFitness,
     totalFitness
-} = population.updateStats();
+  } = population.updateStats();
 ```
 
 [npm]: https://img.shields.io/npm/v/charles.darwin

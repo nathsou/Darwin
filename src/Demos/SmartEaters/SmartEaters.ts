@@ -3,7 +3,7 @@ import { Darwin } from "../../Darwin";
 import { createEater, Eater } from "./Eater";
 import { NeuralNet } from "./NeuralNet";
 import { Vector2D } from "./Vector2D";
-import { MathUtils } from "./MathUtils";
+import { MathUtils } from "../common/MathUtils";
 
 export const DPR = window.devicePixelRatio;
 

@@ -45,7 +45,7 @@ export const crossoverMethod: { [K in CrossoverMethodName]: CrossoverFunction<an
         const aliceChromoLength = alice.getGenes().length;
 
         for (let i = 0; i < aliceChromoLength; i++) {
-            let swap = alice.randomNumber() < 0.5;
+            const swap = alice.randomNumber() < 0.5;
             b1.push(swap ? bobsGenes[i] : alicesGenes[i]);
             b2.push(swap ? alicesGenes[i] : bobsGenes[i]);
         }

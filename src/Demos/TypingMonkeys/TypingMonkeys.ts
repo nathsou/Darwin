@@ -1,17 +1,6 @@
 import { Chromosome } from "../../Chromosome";
 import { Darwin, DarwinParams } from "../../Darwin";
-
-export const alphabet = [
-    'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k',
-    'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', ' ',
-    'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T',
-    'U', 'V', 'W', 'X', 'Y', 'Z', '?', '!', '.', '#', '@', '&', '*', '$', '%', '+', '-', '/', '=',
-    '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '(', ')', ',', "'", '"', ':', '_', '-'
-];
-
-export function randChar(): string {
-    return alphabet[Math.floor(Math.random() * alphabet.length)];
-}
+import { randChar } from '../common/Text';
 
 function stringDist(a: string, b: string): number {
     let diff = 0, e = Math.max(a.length, b.length) - Math.min(a.length, b.length);

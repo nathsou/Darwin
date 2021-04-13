@@ -26,7 +26,7 @@ export interface DarwinStats<T> {
 /**
  * a function to evaluate the fitness of a given chromosome
  */
-export type FitnessEvaluator<T> = (chromo: Readonly<T>[]) => number;
+export type FitnessEvaluator<T> = (chromo: Readonly<T>[], index: number) => number;
 
 export class Darwin<T> {
     private population: Array<Chromosome<T>> = [];
@@ -126,7 +126,7 @@ export class Darwin<T> {
     public updateFitness(fitnessEvaluator: FitnessEvaluator<T>): void {
         for (let i = 0; i < this.population.length; i++) {
             const chromo = this.population[i];
-            chromo.setFitness(fitnessEvaluator(chromo.getGenes()));
+            chromo.setFitness(fitnessEvaluator(chromo.getGenes(), i));
         }
     }
 
@@ -224,7 +224,7 @@ export class Darwin<T> {
 
     /**
      * update the statistics for this generation
-     * if forceUpdate is true, update even if `mate`
+     * if `forceUpdate` is true, update even if `mate`
      * has not been called
      */
     public updateStats(forceUpdate = false): Readonly<DarwinStats<T>> {

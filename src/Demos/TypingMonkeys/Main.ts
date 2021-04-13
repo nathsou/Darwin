@@ -1,50 +1,8 @@
-import { alphabet, MonkeyFactory } from "./TypingMonkeys";
-
-const h = <T extends keyof HTMLElementTagNameMap>(
-    name: T,
-    props: Partial<HTMLElementTagNameMap[T]> = {},
-    style: Partial<Omit<CSSStyleDeclaration, 'length' | 'parentRule'>> = {}
-): HTMLElementTagNameMap[T] => {
-    const element = document.createElement(name);
-
-    for (const [prop, value] of Object.entries(props)) {
-        element[prop as keyof HTMLElementTagNameMap[T]] = value;
-    }
-
-    for (const rule in style) {
-        const value = style[rule];
-        if (value !== undefined) {
-            element.style[rule] = value;
-        }
-    }
-
-    return element;
-};
-
-const appendChildren = <T extends HTMLElement>(target: T, chilren: ChildNode[]): T => {
-    for (const child of chilren) {
-        target.appendChild(child);
-    }
-
-    return target;
-};
-
-const span = (text: string) => h('span', { textContent: text });
+import { MonkeyFactory } from "./TypingMonkeys";
+import { alphabet } from '../common/Text';
+import { h, appendChildren, namedInput } from '../common/Utils';
 
 const br = () => h('br');
-
-const namedInput = (name: string, props: Partial<HTMLInputElement>) => {
-    const input = h('input', props);
-    const div = appendChildren(h('div'), [
-        span(name),
-        input
-    ]);
-
-    return {
-        elem: div,
-        value: () => input.value
-    };
-};
 
 const targetInput = h('input', {
     type: 'text',

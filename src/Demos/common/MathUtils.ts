@@ -1,3 +1,4 @@
+
 export namespace MathUtils {
     export const clamp = (value: number, min: number, max: number): number => {
         if (value >= min && value <= max) return value;

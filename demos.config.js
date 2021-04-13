@@ -42,7 +42,6 @@ const tspDemo = {
     resolve: {
         extensions: ['.ts', '.js']
     },
-
     output: {
         filename: 'tsp.js',
         path: path.join(dist, 'TSP')
@@ -69,7 +68,6 @@ const smartEatersDemo = {
     resolve: {
         extensions: ['.ts', '.js']
     },
-
     output: {
         filename: 'eaters.js',
         path: path.join(dist, 'SmartEaters')
@@ -81,8 +79,39 @@ const smartEatersDemo = {
     ]
 };
 
+const deblurDemo = {
+    entry: path.resolve(__dirname, '/src/Demos/DeblurText/Main.ts'),
+    module: {
+        rules: [{
+            test: /\.ts$/,
+            use: 'ts-loader',
+            exclude: [
+                /node_modules/,
+            ]
+        }]
+    },
+    resolve: {
+        extensions: ['.ts', '.js']
+    },
+    output: {
+        filename: 'deblur.js',
+        path: path.join(dist, 'DeblurText')
+    },
+    devServer: {
+        contentBase: './dist/DeblurText',
+        port: 1621
+    },
+    plugins: [
+        new HtmlWebpackPlugin({
+            title: 'Deblur Text'
+        })
+    ],
+    devtool: 'inline-source-map'
+};
+
 module.exports = [
-    typingMonkeysDemo,
-    tspDemo,
-    smartEatersDemo
+    // typingMonkeysDemo,
+    // tspDemo,
+    // smartEatersDemo,
+    deblurDemo
 ];
